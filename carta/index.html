@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Carta de un bar de ejemplo que cambia de idioma al tocar, con el prompt para hacer la tuya.">
+<meta property="og:title" content="Carta en 5 idiomas">
+<meta property="og:description" content="Toca un idioma y mira la carta cambiar. Con el prompt para hacer la tuya.">
+<title>Carta en 5 idiomas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: página oscura de marca (marino + azul eléctrico) con una carta clara de papel en el centro, como la de una mesa. */
+:root{
+  color-scheme:dark;
+  --bg:#07101F; --panel:#0E1C36; --line:#1d3358; --ink:#F4F7FB; --mute:#9db0cc;
+  --blue:#2F7BFF; --blue-soft:#7fb0ff; --orange:#FF7A1A;
+  --paper:#F4F7FB; --paper-ink:#0b1730; --paper-mute:#566680; --paper-line:#cfd9e8;
+  --fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}
+h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+
+/* selector de idioma */
+.langs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.langs button{font:600 14px/1 var(--fb);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:11px 16px;min-height:44px;cursor:pointer;transition:background .15s,border-color .15s}
+.langs button:hover{border-color:var(--blue)}
+.langs button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+
+/* la carta */
+.menu{background:var(--paper);color:var(--paper-ink);border-radius:18px;padding:28px 22px 22px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.menu-head{text-align:center;padding-bottom:18px;border-bottom:2px solid var(--paper-ink)}
+.menu-head .n{font:800 30px/1 var(--fd);letter-spacing:-.01em}
+.menu-head .s{font:600 11px/1 var(--fb);letter-spacing:.2em;text-transform:uppercase;color:var(--paper-mute);margin-top:9px}
+.sec{margin-top:24px}
+.sec h3{font:700 12px/1 var(--fb);letter-spacing:.18em;text-transform:uppercase;color:var(--blue);padding-bottom:9px;border-bottom:1px solid var(--paper-line)}
+.dish{padding:14px 0;border-bottom:1px solid var(--paper-line)}
+.dish:last-child{border-bottom:0;padding-bottom:0}
+.row{display:flex;align-items:baseline;gap:8px}
+.row .nm{font:700 17px/1.25 var(--fd);min-width:0;overflow-wrap:anywhere}
+.row .dots{flex:1;border-bottom:2px dotted var(--paper-line);transform:translateY(-4px);min-width:12px}
+.row .pr{font:700 16px/1 var(--fb);font-variant-numeric:tabular-nums;white-space:nowrap}
+.dish p{margin:5px 0 0;font-size:14px;line-height:1.45;color:var(--paper-mute)}
+.alg{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.alg span{font:600 11px/1 var(--fb);letter-spacing:.03em;color:#0b3a8a;background:#e1ebfd;border-radius:6px;padding:5px 8px}
+.foot{margin-top:22px;padding-top:14px;border-top:2px solid var(--paper-ink);font-size:13px;color:var(--paper-mute);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.foot b{color:var(--paper-ink);font-weight:600}
+.demo{font:600 11px/1 var(--fb);letter-spacing:.1em;color:var(--orange)}
+#menuBody{transition:opacity .16s}
+#menuBody.out{opacity:0}
+.hint{color:var(--mute);font-size:14px;margin:14px 2px 0}
+
+/* sección del prompt */
+.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}
+.how .lead{margin-top:10px}
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}
+.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.steps span{color:var(--mute);font-size:14.5px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy:hover{filter:brightness(1.1)}
+.copy.ok{background:#1f9d62}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}
+.warn b{color:var(--orange)}
+.sig{color:var(--mute);font-size:13px;text-align:center}
+.sig b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){#menuBody,.langs button{transition:none}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · CARTA</div>
+    <h1>Toca un idioma. <em>Mira la carta cambiar.</em></h1>
+    <p class="lead">Esta es la carta de un bar de ejemplo en 5 idiomas, con precios y alérgenos. Debajo tienes el prompt para hacer la tuya.</p>
+  </header>
+
+  <section aria-label="Demo de la carta">
+    <div class="langs" id="langs" role="group" aria-label="Idioma de la carta"></div>
+    <article class="menu">
+      <div class="menu-head"><div class="n">Bar La Plaza</div><div class="s" id="tagline"></div></div>
+      <div id="menuBody"></div>
+      <div class="foot"><span id="allergyNote"></span><span class="demo">DEMO · DATOS FICTICIOS</span></div>
+    </article>
+    <p class="hint">Así la ve quien escanea el QR de la mesa: elige su idioma y listo.</p>
+  </section>
+
+  <section class="how" aria-label="Cómo hacer la tuya">
+    <h2>Haz la tuya en 3 pasos</h2>
+    <p class="lead">Sin saber programar. Claude te devuelve un archivo con tu carta, en tu diseño y en 5 idiomas.</p>
+    <ol class="steps">
+      <li><div class="dot">1</div><div class="t"><b>Copia el prompt</b><span>Es el de abajo. Cambia solo lo que va entre corchetes.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>Pégalo en Claude con tu carta</b><span>Con tus platos, precios y alérgenos tal cual los tienes, de Word, PDF o web.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>Revisa y ponlo en un QR</b><span>Claude te explica cómo subirlo y generar el QR para las mesas.</span></div></li>
+    </ol>
+
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt para tu carta</span><button class="copy" id="copy" type="button">Copiar prompt</button></div>
+      <pre id="prompt">Eres desarrollador web y traductor profesional de cartas de restaurante.
+
+Quiero la carta de mi negocio como una página web en un único archivo HTML (carta.html), con selector de idioma, para ponerla en un QR en las mesas.
+
+MI NEGOCIO
+- Nombre: [nombre]
+- Color principal: [por ejemplo #2F7BFF o "verde oliva"]
+- Idiomas: español, inglés, francés, alemán e italiano [quita o añade los que quieras]
+
+MI CARTA (con precios y alérgenos si los tienes)
+[PEGA AQUÍ TU CARTA]
+
+QUÉ QUIERO
+1. Un solo archivo HTML, sin librerías ni recursos externos, que se vea bien en el móvil y funcione abriéndolo con doble clic.
+2. Botones de idioma arriba. Al pulsar uno, cambia TODO el texto (secciones, nombres, descripciones y alérgenos) sin recargar la página. Que recuerde el idioma elegido.
+3. Mismos platos, mismo orden y mismos precios. Usa el formato de precio de cada idioma (€9.50 en inglés, 9,50 € en el resto).
+4. Los alérgenos de cada plato como etiquetas pequeñas, traducidas a cada idioma. Usa SOLO los que yo te indique. Si no te los doy, pon "Consultar al personal". No los deduzcas.
+5. Si un plato tiene un nombre muy local, pon la traducción más clara y, entre paréntesis, el nombre original.
+6. Una frase al pie, traducida: "Si tienes alguna alergia, díselo al camarero".
+7. Diseño limpio y legible, con buen contraste y tamaños cómodos para leer en el móvil.
+
+AL TERMINAR
+- Dime qué platos o alérgenos debería revisar yo con más cuidado y qué traducciones te generan dudas.
+- Explícame en tres pasos cómo subirlo a un alojamiento gratuito y cómo crear el QR.</pre>
+    </div>
+
+    <p class="warn"><b>Revísalo antes de imprimir o publicar.</b> La IA traduce en segundos, pero la última palabra es tuya: platos, alérgenos y precios. Los alérgenos son responsabilidad del negocio. Si puedes, que lo lea alguien que domine el idioma.</p>
+  </section>
+
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+
+<script>
+(function(){
+  var L=[['es','Español'],['en','English'],['fr','Français'],['de','Deutsch'],['it','Italiano']];
+  var UI={
+    es:{tag:'Cocina de siempre · desde 1998',allergy:'Si tienes alguna alergia, díselo al camarero.',secs:['Para compartir','Mar y arroces','Postres']},
+    en:{tag:'Traditional kitchen · since 1998',allergy:'If you have an allergy, tell your server.',secs:['To share','Sea and rice','Desserts']},
+    fr:{tag:'Cuisine traditionnelle · depuis 1998',allergy:'En cas d\'allergie, prévenez le serveur.',secs:['À partager','Mer et riz','Desserts']},
+    de:{tag:'Traditionelle Küche · seit 1998',allergy:'Bei Allergien sprechen Sie bitte unser Personal an.',secs:['Zum Teilen','Meer und Reis','Nachspeisen']},
+    it:{tag:'Cucina tradizionale · dal 1998',allergy:'In caso di allergie, informa il cameriere.',secs:['Da condividere','Mare e riso','Dolci']}
+  };
+  var AL={
+    glu:{es:'Gluten',en:'Gluten',fr:'Gluten',de:'Gluten',it:'Glutine'},
+    lac:{es:'Lácteos',en:'Milk',fr:'Lait',de:'Milch',it:'Latte'},
+    hue:{es:'Huevo',en:'Egg',fr:'Œuf',de:'Ei',it:'Uova'},
+    pes:{es:'Pescado',en:'Fish',fr:'Poisson',de:'Fisch',it:'Pesce'},
+    mol:{es:'Moluscos',en:'Molluscs',fr:'Mollusques',de:'Weichtiere',it:'Molluschi'},
+    cru:{es:'Crustáceos',en:'Crustaceans',fr:'Crustacés',de:'Krebstiere',it:'Crostacei'},
+    sul:{es:'Sulfitos',en:'Sulphites',fr:'Sulfites',de:'Sulfite',it:'Solfiti'}
+  };
+  var D=[
+    {s:0,p:6.5,a:['hue','pes'],n:{es:'Ensaladilla rusa',en:'Russian potato salad (ensaladilla)',fr:'Salade russe (ensaladilla)',de:'Russischer Kartoffelsalat (Ensaladilla)',it:'Insalata russa (ensaladilla)'},
+     d:{es:'Patata, zanahoria, atún y mayonesa casera.',en:'Potato, carrot, tuna and homemade mayonnaise.',fr:'Pommes de terre, carotte, thon et mayonnaise maison.',de:'Kartoffeln, Karotte, Thunfisch und hausgemachte Mayonnaise.',it:'Patate, carote, tonno e maionese fatta in casa.'}},
+    {s:0,p:8,a:['glu','lac','hue'],n:{es:'Croquetas caseras de jamón',en:'Homemade ham croquettes',fr:'Croquettes maison au jambon',de:'Hausgemachte Schinkenkroketten',it:'Crocchette di prosciutto fatte in casa'},
+     d:{es:'Cremosas, con jamón ibérico. 6 unidades.',en:'Creamy, with Iberian ham. 6 pieces.',fr:'Onctueuses, au jambon ibérique. 6 pièces.',de:'Cremig, mit iberischem Schinken. 6 Stück.',it:'Cremose, con prosciutto iberico. 6 pezzi.'}},
+    {s:0,p:7,a:['hue'],n:{es:'Tortilla de patata',en:'Spanish potato omelette',fr:'Tortilla espagnole aux pommes de terre',de:'Spanische Kartoffeltortilla',it:'Frittata di patate spagnola'},
+     d:{es:'Jugosa, con cebolla. Ración para compartir.',en:'Juicy, with onion. Portion to share.',fr:'Moelleuse, à l\'oignon. Portion à partager.',de:'Saftig, mit Zwiebeln. Portion zum Teilen.',it:'Morbida, con cipolla. Porzione da condividere.'}},
+    {s:1,p:11.5,a:['glu','mol'],n:{es:'Calamares a la andaluza',en:'Andalusian-style fried squid',fr:'Calamars frits à l\'andalouse',de:'Frittierte Calamari nach andalusischer Art',it:'Calamari fritti all\'andalusa'},
+     d:{es:'Rebozados al momento, con limón.',en:'Battered to order, with lemon.',fr:'Panés à la minute, au citron.',de:'Frisch paniert, mit Zitrone.',it:'Impanati al momento, con limone.'}},
+    {s:1,p:13,a:['cru','sul'],n:{es:'Gambas al ajillo',en:'Garlic prawns',fr:'Crevettes à l\'ail',de:'Knoblauchgarnelen',it:'Gamberi all\'aglio'},
+     d:{es:'Aceite de oliva, ajo laminado y guindilla.',en:'Olive oil, sliced garlic and chilli.',fr:'Huile d\'olive, ail émincé et piment.',de:'Olivenöl, Knoblauchscheiben und Chili.',it:'Olio d\'oliva, aglio a lamelle e peperoncino.'}},
+    {s:1,p:24,a:['sul'],n:{es:'Paella de verduras (para 2)',en:'Vegetable paella (for 2)',fr:'Paella aux légumes (pour 2)',de:'Gemüsepaella (für 2 Personen)',it:'Paella di verdure (per 2)'},
+     d:{es:'Verduras de temporada. Mínimo 2 personas.',en:'Seasonal vegetables. Minimum 2 people.',fr:'Légumes de saison. Minimum 2 personnes.',de:'Saisongemüse. Mindestens 2 Personen.',it:'Verdure di stagione. Minimo 2 persone.'}},
+    {s:2,p:5.5,a:['lac','hue','glu'],n:{es:'Tarta de queso',en:'Cheesecake',fr:'Gâteau au fromage',de:'Käsekuchen',it:'Torta al formaggio'},
+     d:{es:'Horneada, con mermelada de frutos rojos.',en:'Baked, with red berry jam.',fr:'Cuit au four, confiture de fruits rouges.',de:'Gebacken, mit Waldbeerenmarmelade.',it:'Cotta al forno, con marmellata di frutti rossi.'}},
+    {s:2,p:4.5,a:['lac','hue'],n:{es:'Flan casero',en:'Homemade crème caramel (flan)',fr:'Flan maison',de:'Hausgemachter Flan',it:'Flan fatto in casa'},
+     d:{es:'Con caramelo líquido y nata.',en:'With liquid caramel and cream.',fr:'Au caramel liquide et à la crème.',de:'Mit flüssigem Karamell und Sahne.',it:'Con caramello liquido e panna.'}}
+  ];
+  var cur='es', langsEl=document.getElementById('langs'), body=document.getElementById('menuBody');
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function price(p,l){var t=p.toFixed(2);return l==='en'?'€'+t:t.replace('.',',')+' €'}
+  function paint(l){
+    var u=UI[l], h='';
+    u.secs.forEach(function(name,si){
+      h+='<div class="sec"><h3>'+esc(name)+'</h3>';
+      D.filter(function(x){return x.s===si}).forEach(function(x){
+        h+='<div class="dish"><div class="row"><span class="nm">'+esc(x.n[l])+'</span><span class="dots"></span><span class="pr">'+price(x.p,l)+'</span></div>'
+          +'<p>'+esc(x.d[l])+'</p><div class="alg">'+x.a.map(function(k){return '<span>'+esc(AL[k][l])+'</span>'}).join('')+'</div></div>';
+      });
+      h+='</div>';
+    });
+    body.innerHTML=h;
+    document.getElementById('tagline').textContent=u.tag;
+    document.getElementById('allergyNote').textContent=u.allergy;
+    document.getElementById('menuBody').setAttribute('lang',l);
+    Array.prototype.forEach.call(langsEl.children,function(b){b.setAttribute('aria-pressed',b.dataset.l===l?'true':'false')});
+  }
+  function set(l){
+    if(l===cur){return}
+    cur=l; body.classList.add('out');
+    setTimeout(function(){paint(l);body.classList.remove('out')},150);
+  }
+  L.forEach(function(x){
+    var b=document.createElement('button'); b.type='button'; b.textContent=x[1]; b.dataset.l=x[0];
+    b.addEventListener('click',function(){set(x[0])}); langsEl.appendChild(b);
+  });
+  paint('es');
+
+  var btn=document.getElementById('copy'), pre=document.getElementById('prompt');
+  function done(){btn.textContent='Copiado';btn.classList.add('ok');setTimeout(function(){btn.textContent='Copiar prompt';btn.classList.remove('ok')},2200)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selecciona y copia';setTimeout(function(){btn.textContent='Copiar prompt'},2600)}
+  btn.addEventListener('click',function(){
+    var txt=pre.innerText;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}
+  });
+})();
+</script>
+</body>
+</html>
