@@ -1,0 +1,343 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Elige tu sector y descubre las tareas que puedes automatizar con IA desde hoy, con el prompt de cada una.">
+<meta property="og:title" content="¿Qué hace la IA en tu negocio?">
+<meta property="og:description" content="Elige tu sector: 4 tareas que la IA ya hace, con ejemplo y prompt para copiar.">
+<title>¿Qué hace la IA en tu negocio?</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: página oscura de marca; arriba el selector de sectores y la ruleta, debajo 4 tarjetas de tareas con ejemplo animado y prompt. */
+:root{
+  color-scheme:dark;
+  --bg:#07101F; --panel:#0E1C36; --line:#1d3358; --ink:#F4F7FB; --mute:#9db0cc;
+  --blue:#2F7BFF; --blue-soft:#7fb0ff; --orange:#FF7A1A;
+  --paper:#F4F7FB; --paper-ink:#0b1730; --paper-mute:#566680; --paper-line:#cfd9e8;
+  --fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}
+h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+
+/* sectores */
+.secs{display:flex;flex-wrap:wrap;gap:8px}
+.secs button{font:600 14px/1 var(--fb);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:11px 14px;min-height:44px;cursor:pointer;transition:background .15s,border-color .15s}
+.secs button:hover{border-color:var(--blue)}
+.secs button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+
+/* ruleta */
+.rul{position:relative;margin-top:18px;height:76px;border-radius:18px;border:2px solid rgba(47,123,255,.6);background:#081429;overflow:hidden;box-shadow:0 0 40px rgba(47,123,255,.25)}
+.rul::after{content:"";position:absolute;inset:0;background:linear-gradient(#081429 0%,transparent 30%,transparent 70%,#081429 100%);pointer-events:none}
+.strip{position:absolute;left:0;right:0;top:0;will-change:transform}
+.strip div{height:72px;line-height:72px;text-align:center;font:800 clamp(26px,8vw,38px)/72px var(--fd);text-transform:uppercase;letter-spacing:.02em}
+.rul.land{animation:flash .5s ease-out}
+@keyframes flash{0%{border-color:#fff}100%{border-color:rgba(47,123,255,.6)}}
+.hint{color:var(--mute);font-size:14px;margin:12px 2px 0}
+
+/* tareas */
+.tasks{display:flex;flex-direction:column;gap:14px;margin-top:18px}
+.task{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;opacity:0;transform:translateY(14px);transition:opacity .35s ease-out,transform .45s cubic-bezier(.16,1,.3,1)}
+.task.in{opacity:1;transform:none}
+.th{display:flex;align-items:flex-start;gap:12px;justify-content:space-between}
+.th h3{font-size:19px;line-height:1.2}
+.lvl{flex:none;display:flex;gap:4px;align-items:center;margin-top:4px}
+.lvl i{width:9px;height:9px;border-radius:50%;background:var(--line)}
+.lvl i.on{background:var(--blue)}
+.lvl span{font:600 11px/1 var(--fb);color:var(--mute);margin-left:4px;letter-spacing:.04em}
+.task p.what{margin:6px 0 0;color:var(--mute);font-size:14.5px}
+.ex{margin-top:12px;background:var(--paper);color:var(--paper-ink);border-radius:12px;padding:12px;min-height:64px}
+.ex .lab{font:600 10.5px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--paper-mute);display:flex;justify-content:space-between;gap:8px;margin-bottom:8px}
+.ex .lab b{color:var(--orange);font-weight:600}
+.bub{background:#DCF8C6;border-radius:12px 12px 4px 12px;padding:10px 12px;font-size:14.5px;line-height:1.45;white-space:pre-wrap;min-height:22px}
+.bub .cur{display:inline-block;width:2px;height:15px;background:var(--blue);vertical-align:-2px;margin-left:1px}
+table{width:100%;border-collapse:collapse;font-size:13.5px;table-layout:fixed}
+th{text-align:left;font:600 11px/1.2 var(--fb);color:var(--paper-mute);padding:6px 6px;border-bottom:2px solid var(--paper-ink)}
+td{padding:7px 6px;border-bottom:1px solid var(--paper-line);overflow-wrap:anywhere;opacity:0;transition:opacity .25s}
+tr.in td{opacity:1}
+.tb{display:flex;justify-content:flex-end;margin-top:12px}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy:hover{filter:brightness(1.1)}
+.copy.ok{background:#1f9d62}
+
+/* sección del prompt */
+.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}
+.how .lead{margin-top:10px}
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}
+.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.steps span{color:var(--mute);font-size:14.5px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}
+.warn b{color:var(--orange)}
+.sig{color:var(--mute);font-size:13px;text-align:center}
+.sig b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.task,.strip,td{transition:none!important}.rul.land{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · TAREAS</div>
+    <h1>¿Qué hace la IA <em>en tu negocio?</em></h1>
+    <p class="lead">Elige tu sector y descubre 4 tareas que puedes automatizar desde hoy, con un ejemplo y el prompt de cada una.</p>
+  </header>
+
+  <section aria-label="Elige tu sector">
+    <div class="secs" id="secs" role="group" aria-label="Sector"></div>
+    <div class="rul" id="rul" aria-hidden="true"><div class="strip" id="strip"></div></div>
+    <p class="hint" id="hint">Toca tu sector. Los ejemplos son de mentira (DEMO · DATOS FICTICIOS): pon los tuyos en el prompt.</p>
+    <div class="tasks" id="tasks" aria-live="polite"></div>
+  </section>
+
+  <section class="how" aria-label="Tu lista exacta">
+    <h2>Tu lista exacta en 3 pasos</h2>
+    <p class="lead">Las tarjetas de arriba son un punto de partida. Para tu caso concreto, este prompt te devuelve una página con tus 5 tareas y sus prompts.</p>
+    <ol class="steps">
+      <li><div class="dot">1</div><div class="t"><b>Elige tu sector y prueba un prompt</b><span>Copia el de la tarea más fácil (un punto) y pruébalo hoy.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>Pega el prompt completo en Claude</b><span>Es el de abajo. Cambia solo lo que va entre corchetes con tus datos.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>Empieza por la tarea más fácil</b><span>Esta misma semana. Cuando funcione, pasa a la siguiente.</span></div></li>
+    </ol>
+
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt para tu negocio</span><button class="copy" id="copy" type="button">Copiar prompt</button></div>
+      <pre id="prompt">Actúa como consultor de IA para negocios pequeños. Mi negocio es [tipo de negocio] en [ciudad], somos [n.º de personas] y lo que más tiempo nos quita es [tareas que más pesan]. Usamos [WhatsApp, Excel, Instagram, programa de citas…].
+
+Dime las 5 tareas que una IA puede hacer ya por nosotros, ordenadas de más fácil a más difícil. Para cada una: qué hace, con qué herramienta (solo herramientas reales que existan hoy), cuánto tiempo podríamos ahorrar a la semana (marcado como estimación) y el prompt exacto para empezar hoy.
+
+Devuélveme UNA página HTML lista para abrir, con una tarjeta por tarea y un botón para copiar cada prompt.</pre>
+    </div>
+
+    <p class="warn"><b>Los ahorros de tiempo son estimaciones.</b> Antes de automatizar algo con clientes (citas, precios, datos de salud), revisa las respuestas y no compartas datos personales sin su permiso.</p>
+  </section>
+
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+
+<script>
+(function(){
+  // t: título · d: dificultad 1-3 · w: qué hace · m: ejemplo mensaje · tb: ejemplo tabla [cabecera, filas] · p: prompt
+  var S=[
+  {n:'Peluquería',k:[
+    {t:'Recordatorios de cita',d:1,w:'Un mensaje de WhatsApp el día antes para que nadie se olvide.',m:'Hola, Marta 👋 Te recordamos tu cita mañana a las 10:30 (corte y color). ¿Confirmas? Responde SÍ o CAMBIAR.',
+     p:'Escribe 3 versiones de un mensaje de WhatsApp para recordar una cita de mi peluquería [nombre] el día antes. Datos: [nombre clienta], [día y hora], [servicio]. Tono cercano, máximo 300 caracteres y con opción de confirmar o cambiar la cita. Devuélvemelas listas para pegar en mi programa de citas.'},
+    {t:'Respuestas a reseñas',d:1,w:'Contesta las reseñas de Google en tu tono, buenas y malas.',m:'¡Gracias, Lucía! Nos alegra que te encantara el color 💛 Te esperamos en la próxima.',
+     p:'Te pego las últimas reseñas de Google de mi peluquería [nombre]: [pega reseñas]. Escribe una respuesta para cada una, en tono cercano y profesional, sin prometer nada que no pueda cumplir. Devuélvemelas en una tabla: reseña · respuesta.'},
+    {t:'Textos de antes y después',d:2,w:'El texto para cada foto de Instagram de un cambio de look.',m:'De castaño apagado a cobrizo con brillo ✨ 2 horas de trabajo y una clienta feliz. ¿Te animas? Reserva por WhatsApp.',
+     p:'Escribe 5 textos para Instagram de fotos de antes y después de mi peluquería [nombre] en [ciudad]. Servicios: [lista]. Máximo 200 caracteres, un emoji, una llamada a reservar y 5 hashtags locales. Devuélvelos en una tabla lista para copiar.'},
+    {t:'Clientas que no vuelven',d:3,w:'Detecta quién lleva semanas sin venir y le prepara un mensaje.',tb:[['Clienta','Última','Mensaje'],[['Ana','9 sem.','Te echamos de menos 💇'],['Sara','11 sem.','¿Retocamos el color?'],['Eva','14 sem.','10 % en tu vuelta']]],
+     p:'Te paso mis clientas con la fecha de su última visita: [pega CSV o tabla]. Devuélveme una tabla con las que llevan más de [8] semanas sin venir, ordenadas de más a menos tiempo, con un mensaje de WhatsApp personalizado para cada una (máximo 250 caracteres). Devuélvelo como archivo CSV.'}
+  ]},
+  {n:'Bar',k:[
+    {t:'Carta en 6 idiomas',d:1,w:'Traduce la carta entera, con el formato de precio de cada idioma.',tb:[['ES','EN','€'],[['Croquetas caseras','Homemade croquettes','8,50'],['Pulpo a la gallega','Galician-style octopus','16,00'],['Tarta de queso','Cheesecake','6,50']]],
+     p:'Traduce la carta de mi bar [nombre] a inglés, francés, alemán, italiano y portugués: [pega tu carta]. Mismo orden y mismos precios. Si un plato es muy local, añade el nombre original entre paréntesis. Devuélveme una página HTML con un botón por idioma, lista para un QR.'},
+    {t:'Respuestas a reseñas',d:1,w:'Contesta a Google y TripAdvisor en tu tono, también a las malas.',m:'Siento la espera del sábado, Javier. Tenías razón: íbamos cortos de personal. La próxima caña va por la casa 🍺',
+     p:'Te pego las reseñas de mi bar [nombre]: [pega reseñas]. Escribe una respuesta corta y honesta para cada una. En las negativas, reconoce el fallo sin excusas. Devuélvelas en una tabla: reseña · respuesta.'},
+    {t:'Pedido a proveedores',d:2,w:'Calcula qué pedir según lo que gastas cada semana.',tb:[['Producto','Stock','Pedir'],[['Barril cerveza','1','3'],['Pulpo (kg)','2','6'],['Huevos (doc.)','4','10']]],
+     p:'Te paso mi consumo de las últimas 4 semanas y el stock actual: [pega datos]. Calcula qué tengo que pedir esta semana para no quedarme corto, con un 10 % de margen. Devuélveme una tabla en CSV: producto · stock · pedir · proveedor.'},
+    {t:'Turnos del personal',d:3,w:'Cuadra los turnos de la semana con libranzas y horas.',tb:[['Día','Mañana','Tarde'],[['Lunes','Pablo','Irene'],['Viernes','Irene','Pablo + Leo'],['Sábado','Leo','Todos']]],
+     p:'Organiza los turnos de la semana de mi bar. Personal: [nombres, horas por contrato, libranzas]. Horario: [apertura y cierre]. Días fuertes: [días]. Que nadie pase de sus horas. Devuélveme una página HTML con el cuadrante y el total de horas de cada persona.'}
+  ]},
+  {n:'Restaurante',k:[
+    {t:'Contestar reservas',d:1,w:'Responde a las peticiones de reserva por WhatsApp o Instagram.',m:'¡Hola, Pedro! Mesa para 4 el sábado a las 21:30 confirmada ✅ Si cambia algo, escríbenos por aquí.',
+     p:'Escribe las 6 respuestas de WhatsApp que más uso en mi restaurante [nombre]: confirmar reserva, sin mesa a esa hora (ofrecer otra), grupos grandes, alergias, cancelar y retraso. Horario: [horario]. Devuélvemelas en una tabla lista para guardar como respuestas rápidas.'},
+    {t:'Menú del día en redes',d:1,w:'El post del menú de hoy en un minuto.',m:'🍽️ MENÚ DE HOY · 13,90 €\nLentejas de la abuela · Merluza en salsa verde · Flan casero. ¡Te esperamos!',
+     p:'Con este menú del día: [primeros, segundos, postres y precio], escribe un post para Instagram y un estado de WhatsApp para mi restaurante [nombre]. Que abra el apetito, sin exagerar. Devuélveme los dos textos listos para copiar.'},
+    {t:'Coste por plato',d:2,w:'Calcula el coste de cada plato y el margen que te deja.',tb:[['Plato','Coste','Margen'],[['Arroz negro','4,20 €','70 %'],['Entrecot','9,80 €','55 %'],['Ensalada','1,90 €','82 %']]],
+     p:'Te paso los ingredientes de mis platos con cantidades y precios de compra: [pega datos] y el precio de venta de cada uno. Calcula el coste por ración y el margen. Devuélveme una página HTML con la tabla y marca en rojo los platos con menos de [60] % de margen.'},
+    {t:'Tabla de alérgenos',d:3,w:'Ordena los alérgenos de cada plato a partir de tus fichas.',tb:[['Plato','Alérgenos',''],[['Croquetas','Gluten, leche, huevo',''],['Gambas','Crustáceos',''],['Flan','Leche, huevo','']]],
+     p:'Con las fichas de mis platos y los alérgenos que yo te indico: [pega datos], ordénalos en una tabla con los 14 alérgenos oficiales. No deduzcas nada: si falta un dato, pon «CONSULTAR». Devuélveme una página HTML imprimible.'}
+  ]},
+  {n:'Tienda',k:[
+    {t:'Fichas de producto',d:1,w:'La descripción de cada producto para la web en un minuto.',m:'Ligera como una nube y lista para la ciudad. Suela acolchada y tejido transpirable para caminar todo el día.',
+     p:'Escribe la descripción de estos productos de mi tienda online [nombre]: [nombre, materiales, medidas y precio de cada uno]. Para cada uno: título, 2 frases que vendan y 4 puntos clave, sin inventar características. Devuélvemelo en un CSV listo para importar en mi tienda.'},
+    {t:'Preguntas de clientes',d:1,w:'Respuestas listas a envíos, cambios y tallas.',m:'¡Hola! Enviamos en 24-48 h y los cambios son gratis durante 30 días 📦',
+     p:'Escribe las respuestas a las 10 preguntas que más me hacen en mi tienda [nombre]: [pega preguntas]. Mis condiciones: [envíos, cambios, devoluciones, pagos]. Tono cercano y corto. Devuélvemelas en una tabla lista para respuestas rápidas.'},
+    {t:'Email de novedades',d:2,w:'El correo semanal con lo que acaba de llegar.',m:'Asunto: Acaba de llegar (y vuela) 👀\nLa nueva colección de otoño ya está en tienda. Primeras 50 compras con envío gratis.',
+     p:'Escribe el email de novedades de esta semana de mi tienda [nombre]. Productos nuevos: [lista]. Oferta: [oferta o ninguna]. 3 asuntos para elegir, texto corto y un botón. Devuélvemelo como página HTML lista para pegar en mi programa de emails.'},
+    {t:'Reposición de stock',d:3,w:'Avisa de qué se va a acabar antes de que pase.',tb:[['Producto','Quedan','Reponer'],[['Zapatilla 41','2','Ya'],['Bolso negro','5','Esta semana'],['Gorro lana','18','No']]],
+     p:'Te paso mis ventas de los últimos 3 meses y el stock actual: [pega datos]. Calcula para cada producto cuántas semanas de stock me quedan y qué tengo que reponer ya. Devuélveme una página HTML con la tabla ordenada por urgencia.'}
+  ]},
+  {n:'Clínica',k:[
+    {t:'Preguntas de siempre',d:1,w:'Respuestas al instante a horarios, mutuas o parking.',m:'¿Hay parking? → Sí, hay un parking público a 2 minutos andando. ¿Algo más? 😊',
+     p:'Escribe las respuestas a las 12 preguntas que más nos hacen en la clínica [nombre]: [pega preguntas]. Datos: [horario, dirección, mutuas, precios, duración de la primera visita]. Nada de consejos médicos. Devuélvemelas en una tabla lista para respuestas rápidas de WhatsApp.'},
+    {t:'Recordatorio de cita',d:1,w:'Reduce las citas a las que nadie se presenta.',m:'Hola, Luis. Te recordamos tu cita el jueves a las 17:00 en Clínica Centro. Si no puedes venir, avísanos aquí.',
+     p:'Escribe 3 mensajes de recordatorio de cita para mi clínica [nombre]: 48 h antes, 2 h antes y si la persona no se presentó. Sin datos de salud en el mensaje. Máximo 250 caracteres. Devuélvemelos listos para mi programa de citas.'},
+    {t:'Hojas de indicaciones',d:2,w:'Textos claros para antes o después de una visita (los revisa el profesional).',m:'Antes de tu primera sesión: ropa cómoda, informes previos si los tienes y llega 10 minutos antes.',
+     p:'Redacta una hoja de indicaciones para pacientes de mi clínica sobre [antes de la primera visita / después de un tratamiento]. Lenguaje sencillo y frases cortas. Marca con [REVISAR] todo lo que deba confirmar un profesional. Devuélvemela como página HTML imprimible.'},
+    {t:'Huecos de la agenda',d:3,w:'Detecta horas libres y a quién ofrecérselas.',tb:[['Día','Hueco','Avisar a'],[['Martes','12:00','Lista de espera'],['Jueves','18:30','Revisiones'],['Viernes','9:00','Primeras visitas']]],
+     p:'Te paso mi agenda de la próxima semana sin nombres de pacientes: [pega huecos y citas]. Detecta los huecos libres y propón a qué tipo de cita dedicarlos y un mensaje para ofrecerlos. Devuélveme una página HTML con la tabla.'}
+  ]},
+  {n:'Fisio',k:[
+    {t:'Aviso de bono',d:1,w:'Avisa cuando a alguien le quedan pocas sesiones.',m:'¡Hola, Marta! Te quedan 2 sesiones de tu bono. ¿Te reservo la siguiente para la semana que viene?',
+     p:'Escribe 3 mensajes de WhatsApp para mi centro de fisioterapia [nombre]: quedan 2 sesiones del bono, bono terminado y oferta de renovación [condiciones]. Cercano y corto, sin datos de salud. Devuélvemelos listos para copiar.'},
+    {t:'Posts que educan',d:1,w:'Ideas y textos de Instagram sobre dolores comunes.',m:'3 gestos que cargan tu espalda sin que te des cuenta 👇 (y cómo cambiarlos en 10 segundos).',
+     p:'Dame 10 ideas de posts para Instagram de mi centro de fisioterapia en [ciudad] sobre [espalda, cuello, deporte…] y escribe el texto de las 3 mejores. Divulgativo, sin diagnósticos ni promesas. Devuélvemelo en una tabla.'},
+    {t:'Ejercicios para casa',d:2,w:'Explica la pauta de ejercicios con palabras sencillas (la revisa el fisio).',m:'1. Puente de glúteo · 3 × 12\nTúmbate boca arriba, rodillas dobladas, y sube la cadera despacio.',
+     p:'Convierte esta pauta de ejercicios que he pautado yo: [pega ejercicios, series y repeticiones] en una hoja clara para el paciente, con frases cortas y un consejo por ejercicio. No añadas ejercicios. Devuélvemela como página HTML imprimible.'},
+    {t:'Pacientes que abandonan',d:3,w:'Ve quién dejó el tratamiento a medias y cómo retomarlo.',tb:[['Paciente','Sesiones','Última'],[['P-014','3 de 8','5 sem.'],['P-022','5 de 10','4 sem.'],['P-031','2 de 6','7 sem.']]],
+     p:'Te paso un listado anonimizado de tratamientos: código de paciente, sesiones hechas, sesiones previstas y fecha de la última: [pega datos]. Devuélveme una tabla con quién lo dejó a medias hace más de [3] semanas y un mensaje para retomarlo. En CSV.'}
+  ]},
+  {n:'Gimnasio',k:[
+    {t:'Bienvenida a socios',d:1,w:'El primer mensaje que hace que vuelvan la segunda semana.',m:'¡Bienvenido, Dani! 💪 Tu primera clase de prueba es el lunes a las 19:00. Trae agua y toalla.',
+     p:'Escribe la secuencia de bienvenida para nuevos socios de mi gimnasio [nombre]: día 1, día 3, día 7 y día 21. Horarios: [horario]. Clases: [lista]. Mensajes de WhatsApp cortos y con energía. Devuélvemelos en una tabla.'},
+    {t:'Horarios y tarifas',d:1,w:'Respuestas listas a lo que más preguntan.',m:'Abrimos de 7:00 a 22:00. Cuota mensual 39 €, sin matrícula este mes 🙌',
+     p:'Escribe las respuestas a las 10 preguntas más frecuentes de mi gimnasio [nombre]. Datos: [horarios, tarifas, permanencia, clases, parking]. Cortas y claras. Devuélvemelas en una tabla para respuestas rápidas.'},
+    {t:'Parrilla de clases',d:2,w:'Ordena las clases de la semana sin solapes.',tb:[['Hora','Lunes','Miércoles'],[['9:00','Pilates','Yoga'],['19:00','Spinning','Cross'],['20:00','Cross','Spinning']]],
+     p:'Organiza la parrilla semanal de clases de mi gimnasio. Clases: [lista y duración]. Monitores y su disponibilidad: [datos]. Salas: [n.º]. Horas punta: [horas]. Devuélveme una página HTML con la parrilla lista para imprimir.'},
+    {t:'Socios en riesgo de baja',d:3,w:'Detecta quién ha dejado de venir antes de que se dé de baja.',tb:[['Socio','Visitas/mes','Acción'],[['S-104','1 (antes 9)','Llamar'],['S-221','0','Mensaje'],['S-087','2 (antes 8)','Clase gratis']]],
+     p:'Te paso las visitas por mes de mis socios (sin nombres): [pega datos]. Detecta quién ha bajado mucho su asistencia y propón una acción para cada uno con su mensaje. Devuélveme una tabla en CSV ordenada por riesgo.'}
+  ]},
+  {n:'Taller',k:[
+    {t:'Aviso de coche listo',d:1,w:'Avisa al cliente con el importe y la hora de recogida.',m:'Hola, Ramón. Tu Seat León ya está listo 🔧 Total: 186,40 €. Puedes pasar hasta las 19:30.',
+     p:'Escribe los mensajes de WhatsApp que más envío en mi taller [nombre]: coche recibido, presupuesto listo, pieza en camino, coche listo y recordatorio de recogida. Horario: [horario]. Devuélvemelos en una tabla.'},
+    {t:'Presupuestos que se entienden',d:2,w:'Explica cada reparación en palabras que entiende cualquiera.',m:'Pastillas de freno: las que frenan el coche. Están al 10 %; cambiarlas evita dañar los discos (más caros).',
+     p:'Te pego un presupuesto de mi taller: [pega líneas y precios]. Explica cada línea en una frase que entienda cualquiera y marca qué es urgente y qué puede esperar. No cambies precios. Devuélvemelo como página HTML para enviar al cliente.'},
+    {t:'Recordatorio de revisión',d:2,w:'Avisa de la ITV o la revisión antes de que se pase.',m:'Hola, Elena. Tu ITV caduca el 14 de noviembre. ¿Te hacemos la prerrevisión esta semana?',
+     p:'Te paso mis clientes con matrícula, fecha de ITV y de última revisión: [pega datos]. Devuélveme una tabla con los que tienen la ITV o la revisión en los próximos [30] días y un mensaje para cada uno. En CSV.'},
+    {t:'Registro de reparaciones',d:3,w:'Ordena el historial de cada coche para no perder nada.',tb:[['Matrícula','Fecha','Trabajo'],[['1234 ABC','12/09','Frenos'],['5678 DEF','03/10','Aceite y filtros'],['1234 ABC','20/10','Neumáticos']]],
+     p:'Te paso mis albaranes del último año: [pega texto o datos]. Ordénalos en un historial por matrícula con fecha, trabajo, kilómetros e importe. Devuélveme una página HTML con buscador por matrícula.'}
+  ]},
+  {n:'Inmobiliaria',k:[
+    {t:'Descripción de pisos',d:1,w:'El anuncio de cada piso en un minuto, sin exagerar.',m:'Luminoso 3 dormitorios con terraza de 12 m², a 5 minutos del metro. Cocina reformada y trastero.',
+     p:'Escribe el anuncio de este inmueble: [m², habitaciones, baños, extras, zona, precio]. Un título de 60 caracteres, una descripción de 600 y 5 puntos clave. Sin inventar nada. Devuélvemelo listo para pegar en el portal.'},
+    {t:'Primer contacto',d:1,w:'Responde al momento a quien pregunta por un anuncio.',m:'¡Hola, Clara! El piso de la calle Mayor sigue disponible. ¿Te va bien verlo el jueves a las 18:00?',
+     p:'Escribe las respuestas que más uso en mi inmobiliaria [nombre]: piso disponible, ya reservado (ofrecer otros), pedir datos para la visita, confirmar visita y seguimiento después. Devuélvemelas en una tabla.'},
+    {t:'Comparativa de pisos',d:2,w:'Compara opciones para un comprador en una sola tabla.',tb:[['Piso','€/m²','Extra'],[['Centro 3D','2.950','Terraza'],['Norte 2D','2.480','Garaje'],['Este 3D','2.610','Piscina']]],
+     p:'Compara estos inmuebles para un cliente que busca [necesidades]: [pega datos de cada piso]. Calcula el precio por m² y destaca lo mejor y lo peor de cada uno. Devuélveme una página HTML con la comparativa lista para enviar.'},
+    {t:'Seguimiento de compradores',d:3,w:'Que ningún interesado se enfríe por falta de llamada.',tb:[['Cliente','Busca','Próximo paso'],[['C-08','3D centro','Visita jueves'],['C-15','Ático','Enviar 2 pisos'],['C-21','2D norte','Llamar']]],
+     p:'Te paso mis compradores (sin datos personales): qué buscan, presupuesto y último contacto: [pega datos]. Devuélveme una tabla con el próximo paso y la fecha para cada uno, ordenada por prioridad. En CSV.'}
+  ]},
+  {n:'Academia',k:[
+    {t:'Ejercicios por nivel',d:1,w:'Fichas de práctica para cada nivel en un minuto.',m:'Nivel B1 · Completa con el pasado: «Yesterday I ___ (go) to the cinema with my friends.»',
+     p:'Crea una ficha de [10] ejercicios de [asignatura y tema] para el nivel [nivel], con las soluciones aparte. Devuélvemela como página HTML imprimible, con las soluciones en una segunda hoja.'},
+    {t:'Mensajes a familias',d:1,w:'Avisos claros de faltas, pagos y reuniones.',m:'Hola, familia de Hugo. Os recordamos la reunión del martes a las 18:00 para ver su progreso.',
+     p:'Escribe los avisos que más envío en mi academia [nombre]: falta de asistencia, recibo pendiente, reunión, cambio de horario y examen próximo. Tono amable y corto. Devuélvemelos en una tabla.'},
+    {t:'Horarios de grupos',d:2,w:'Cuadra grupos, aulas y profes sin choques.',tb:[['Hora','Aula 1','Aula 2'],[['17:00','Inglés A2','Mates 3.º ESO'],['18:00','Inglés B1','Física'],['19:00','Inglés B2','Mates 4.º ESO']]],
+     p:'Organiza los horarios de mi academia. Grupos: [lista y horas semanales]. Profes y disponibilidad: [datos]. Aulas: [n.º]. Devuélveme una página HTML con el horario semanal sin solapes.'},
+    {t:'Informe de progreso',d:3,w:'Convierte tus notas en un informe para las familias.',tb:[['Área','Nota','Comentario'],[['Gramática','7,5','Mejora clara'],['Speaking','6','Más práctica'],['Listening','8','Muy bien']]],
+     p:'Con estas notas y comentarios del trimestre de un alumno: [pega datos sin el nombre completo], redacta un informe para la familia: puntos fuertes, a mejorar y 3 consejos para casa. Devuélvemelo como página HTML imprimible.'}
+  ]},
+  {n:'Floristería',k:[
+    {t:'Mensaje de la tarjeta',d:1,w:'Ayuda al cliente a escribir la dedicatoria.',m:'Para mamá: gracias por regarnos siempre de cariño. Feliz cumpleaños 🌷',
+     p:'Escribe 10 dedicatorias cortas para tarjetas de flores de mi floristería: cumpleaños, aniversario, ánimo, pésame y agradecimiento (2 de cada). Máximo 120 caracteres. Devuélvemelas en una tabla para tenerlas en el mostrador.'},
+    {t:'Posts de temporada',d:1,w:'Textos para Instagram según la flor del mes.',m:'Llegan las dalias 🌸 Duran hasta 10 días en jarrón si cambias el agua cada 2. Ramos desde 25 €.',
+     p:'Haz un calendario de posts para Instagram de mi floristería en [ciudad] para los próximos 2 meses: flor de temporada, fecha clave y texto de cada post. Devuélvemelo como página HTML con un post por tarjeta.'},
+    {t:'Pedidos de fechas clave',d:2,w:'Calcula cuántas flores pedir para San Valentín o Todos los Santos.',tb:[['Flor','Año pasado','Pedir'],[['Rosa roja','420','480'],['Crisantemo','300','330'],['Eucalipto','90','100']]],
+     p:'Te paso lo que vendí el año pasado en [fecha clave]: [pega datos]. Calcula cuánto pedir este año con un [10] % más y sin pasarme. Devuélveme una tabla en CSV: flor · vendido · pedir · proveedor.'},
+    {t:'Entregas del día',d:3,w:'Ordena encargos y repartos por zona y hora.',tb:[['Hora','Zona','Encargo'],[['10:00','Centro','Ramo rosas'],['11:30','Norte','Centro de mesa'],['13:00','Centro','Corona']]],
+     p:'Te paso los encargos de hoy: dirección (solo calle y zona), hora y producto: [pega datos]. Ordénalos en una ruta de reparto lógica por zonas y horas. Devuélveme una página HTML imprimible con la ruta.'}
+  ]},
+  {n:'Asesoría',k:[
+    {t:'Pedir documentación',d:1,w:'Recordatorios para que los clientes manden sus papeles a tiempo.',m:'Hola, Carmen. Para el IVA del trimestre necesitamos tus facturas antes del 10 de octubre 📎',
+     p:'Escribe los recordatorios que envío a los clientes de mi asesoría: documentación trimestral, recordatorio a falta de 5 días, último aviso y confirmación de recibido. Tono amable y claro. Devuélvemelos en una tabla.'},
+    {t:'Cartas en lenguaje claro',d:2,w:'Explica una notificación oficial en palabras sencillas (la revisa el asesor).',m:'Resumen: Hacienda pide un justificante de un gasto. Plazo: 10 días hábiles. No es una multa.',
+     p:'Te pego una notificación oficial sin datos personales: [pega texto]. Explícala en 5 frases sencillas para mi cliente: qué pide, plazo y qué tiene que hacer. Marca con [REVISAR] lo que yo deba confirmar. Devuélvemelo como texto listo para enviar.'},
+    {t:'Clasificar gastos',d:2,w:'Ordena facturas por tipo para preparar el trimestre.',tb:[['Proveedor','Tipo','Importe'],[['Gasolinera','Combustible','62,10 €'],['Telefónica','Suministros','45,00 €'],['Papelería','Material','18,30 €']]],
+     p:'Te paso los conceptos e importes de las facturas de gasto de un cliente: [pega datos]. Clasifícalas por tipo de gasto y marca las dudosas. Devuélveme una tabla en CSV con un total por tipo.'},
+    {t:'Calendario fiscal',d:3,w:'Todas las fechas de tus clientes en una sola vista.',tb:[['Fecha','Modelo','Clientes'],[['20/10','303 · IVA','18'],['20/10','130 · IRPF','11'],['30/10','Recordatorio','Todos']]],
+     p:'Con estos clientes y sus obligaciones (sin datos personales): [pega tabla], crea el calendario fiscal del próximo trimestre con fechas, modelos y a quién afecta cada una. Comprueba las fechas en la web de la Agencia Tributaria. Devuélveme una página HTML con el calendario.'}
+  ]}
+  ];
+
+  var REP=10, IH=72;
+  var secsEl=document.getElementById('secs'), strip=document.getElementById('strip'), rul=document.getElementById('rul'), tasksEl=document.getElementById('tasks');
+  var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var pos=0, timers=[];
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+  var h='';
+  for(var r=0;r<REP;r++){S.forEach(function(s){h+='<div>'+esc(s.n)+'</div>'})}
+  strip.innerHTML=h;
+  strip.style.transform='translateY(0px)';
+
+  function clearTimers(){timers.forEach(clearTimeout);timers=[]}
+  function later(fn,ms){timers.push(setTimeout(fn,ms))}
+
+  function spin(i,done){
+    // avanza al menos 2 vueltas y aterriza en el sector i
+    var n=S.length, cur=pos%n, target=pos+2*n+((i-cur+n)%n);
+    if(target>=n*REP-1){pos=cur;strip.style.transition='none';strip.style.transform='translateY('+(-pos*IH)+'px)';strip.offsetHeight;target=pos+2*n+((i-cur+n)%n)}
+    pos=target;
+    var ms=reduce?0:1300;
+    strip.style.transition=reduce?'none':'transform '+ms+'ms cubic-bezier(.12,.75,.15,1)';
+    strip.style.transform='translateY('+(-pos*IH)+'px)';
+    later(function(){rul.classList.remove('land');rul.offsetWidth;rul.classList.add('land');done()},ms);
+  }
+
+  function lvl(d){var s='';for(var k=1;k<=3;k++){s+='<i class="'+(k<=d?'on':'')+'"></i>'}return '<div class="lvl" aria-label="Dificultad '+d+' de 3">'+s+'<span>'+['FÁCIL','MEDIA','AVANZADA'][d-1]+'</span></div>'}
+
+  function card(t,ti){
+    var ex=t.tb
+      ? '<table><thead><tr>'+t.tb[0].map(function(c){return '<th>'+esc(c)+'</th>'}).join('')+'</tr></thead><tbody>'+t.tb[1].map(function(r){return '<tr>'+r.map(function(c){return '<td>'+esc(c)+'</td>'}).join('')+'</tr>'}).join('')+'</tbody></table>'
+      : '<div class="bub" data-txt="'+esc(t.m)+'"></div>';
+    return '<article class="task"><div class="th"><h3>'+esc(t.t)+'</h3>'+lvl(t.d)+'</div><p class="what">'+esc(t.w)+'</p>'
+      +'<div class="ex"><div class="lab"><span>Ejemplo de resultado</span><b>DEMO · DATOS FICTICIOS</b></div>'+ex+'</div>'
+      +'<div class="tb"><button class="copy" type="button" data-i="'+ti+'">Copiar prompt</button></div></article>';
+  }
+
+  function play(el,delay){
+    var b=el.querySelector('.bub');
+    if(b){
+      var txt=b.getAttribute('data-txt');
+      if(reduce){b.textContent=txt;return}
+      var i=0, step=Math.max(12,Math.min(28,1600/txt.length));
+      later(function tick(){i+=1;b.innerHTML=esc(txt.slice(0,i))+(i<txt.length?'<span class="cur"></span>':'');if(i<txt.length){later(tick,step)}},delay);
+    }else{
+      el.querySelectorAll('tbody tr').forEach(function(tr,k){later(function(){tr.classList.add('in')},reduce?0:delay+k*260)});
+    }
+  }
+
+  var current=null;
+  function choose(i){
+    clearTimers();
+    current=S[i];
+    Array.prototype.forEach.call(secsEl.children,function(b,k){b.setAttribute('aria-pressed',k===i?'true':'false')});
+    tasksEl.innerHTML='';
+    spin(i,function(){
+      tasksEl.innerHTML=current.k.map(card).join('');
+      Array.prototype.forEach.call(tasksEl.children,function(el,k){
+        later(function(){el.classList.add('in')},reduce?0:k*90);
+        play(el,reduce?0:250+k*90);
+      });
+    });
+  }
+
+  S.forEach(function(s,i){
+    var b=document.createElement('button');b.type='button';b.textContent=s.n;b.setAttribute('aria-pressed','false');
+    b.addEventListener('click',function(){choose(i)});secsEl.appendChild(b);
+  });
+
+  function copyText(btn,txt,label){
+    function done(){btn.textContent='Copiado';btn.classList.add('ok');setTimeout(function(){btn.textContent=label;btn.classList.remove('ok')},2200)}
+    function fallback(){var ta=document.createElement('textarea');ta.value=txt;ta.setAttribute('readonly','');ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+      var ok=false;try{ok=document.execCommand('copy')}catch(e){}document.body.removeChild(ta);if(ok){done()}else{btn.textContent='No se pudo copiar';setTimeout(function(){btn.textContent=label},2400)}}
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}
+  }
+  tasksEl.addEventListener('click',function(e){
+    var btn=e.target.closest('.copy'); if(!btn||!current){return}
+    copyText(btn,current.k[+btn.getAttribute('data-i')].p,'Copiar prompt');
+  });
+  var mainBtn=document.getElementById('copy'), pre=document.getElementById('prompt');
+  mainBtn.addEventListener('click',function(){copyText(mainBtn,pre.innerText,'Copiar prompt')});
+})();
+</script>
+</body>
+</html>
