@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Pega tu post y descubre su nota real y cómo quedaría para sacar un 9. Con el prompt para Claude.">
+<meta property="og:title" content="Destructor de posts">
+<meta property="og:description" content="Toca un post de ejemplo, mira su nota y cómo queda reescrito. Con el prompt para puntuar el tuyo.">
+<title>Destructor de posts</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: página oscura de marca (marino + azul eléctrico) con un post de Instagram claro en el centro que Claude puntúa. */
+:root{
+  color-scheme:dark;
+  --bg:#07101F; --panel:#0E1C36; --line:#1d3358; --ink:#F4F7FB; --mute:#9db0cc;
+  --blue:#2F7BFF; --blue-soft:#7fb0ff; --orange:#FF7A1A; --red:#ff3b30; --green:#1f9d62;
+  --fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}
+h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+
+/* selector de post y antes/después */
+.pick{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.pick button{font:600 14px/1 var(--fb);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:11px 16px;min-height:44px;cursor:pointer}
+.pick button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.toggle{display:inline-flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px;margin-bottom:16px}
+.toggle button{font:700 13px/1 var(--fb);letter-spacing:.12em;color:var(--mute);background:none;border:0;border-radius:999px;padding:11px 18px;min-height:40px;cursor:pointer}
+.toggle button[aria-pressed="true"]{background:#fff;color:var(--bg)}
+.toggle button[data-v="after"][aria-pressed="true"]{background:var(--blue);color:#fff}
+
+/* nota */
+.score{display:flex;align-items:flex-end;gap:14px;margin-bottom:14px}
+.big{font:800 108px/0.85 var(--fd);letter-spacing:-.04em;color:#fff;font-variant-numeric:tabular-nums;
+  text-shadow:2px 2px 0 #1f56c4,4px 4px 0 #1b4cae,6px 6px 0 #17429a,8px 8px 0 #0f2e70}
+.big.bad{color:var(--red);text-shadow:2px 2px 0 #7a1a14,4px 4px 0 #64150f,6px 6px 0 #4e100b,8px 8px 0 #380b07}
+.big small{font-size:44px;color:var(--mute);text-shadow:none;letter-spacing:0}
+.verdict{font:600 14px/1.4 var(--fb);color:var(--mute);padding-bottom:10px;max-width:24ch}
+.crit{display:flex;flex-direction:column;gap:9px;margin-bottom:20px}
+.crit .r{display:grid;grid-template-columns:118px 1fr 28px;align-items:center;gap:10px;font-size:13.5px;color:var(--mute)}
+.crit .b{height:10px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden}
+.crit .b i{display:block;height:100%;width:0;border-radius:99px;background:var(--red);transition:width .7s cubic-bezier(.2,.9,.3,1),background .4s}
+.crit .r span:last-child{font:700 14px/1 var(--fb);color:var(--ink);text-align:right;font-variant-numeric:tabular-nums}
+
+/* post de Instagram */
+.ig{position:relative;background:#fff;color:#111;border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.ig-h{display:flex;align-items:center;gap:10px;padding:12px 14px}
+.av{width:36px;height:36px;border-radius:50%;padding:2px;background:conic-gradient(#feda75,#fa7e1e,#d62976,#962fbf,#4f5bd5,#feda75)}
+.av div{width:100%;height:100%;border-radius:50%;border:2px solid #fff;display:grid;place-items:center;font:800 13px/1 var(--fd);color:#fff}
+.ig-h b{font-size:14px;display:block;line-height:1.2}.ig-h span{font-size:12px;color:#666}
+.ph{position:relative;aspect-ratio:1/1;display:grid;place-items:center;font-size:clamp(84px,30vw,150px);transition:filter .5s}
+.ph.dark{filter:brightness(.38) saturate(.5) blur(.6px)}
+.ig-a{display:flex;gap:14px;padding:10px 14px 4px;font-size:22px;line-height:1}
+.ig-l{padding:2px 14px;font-size:13.5px;font-weight:700}
+.cap{padding:4px 14px 40px;font-size:14px;line-height:1.5;min-height:6em}
+.cap b{font-weight:700}
+.marks{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none;overflow:visible}
+.marks ellipse{fill:none;stroke:var(--red);stroke-width:5;stroke-linecap:round;stroke-dasharray:1;stroke-dashoffset:1;transition:stroke-dashoffset .55s cubic-bezier(.2,.8,.3,1)}
+.marks.on ellipse{stroke-dashoffset:0}
+.marks.on ellipse:nth-of-type(2){transition-delay:.25s}.marks.on ellipse:nth-of-type(3){transition-delay:.5s}
+.tag{position:absolute;font:800 11px/1 var(--fb);letter-spacing:.08em;color:#fff;background:var(--red);padding:6px 9px;border-radius:7px;opacity:0;transform:scale(.6) rotate(-3deg);transition:opacity .2s,transform .3s cubic-bezier(.3,1.6,.5,1)}
+.marks.on ~ .tag{opacity:1;transform:scale(1) rotate(-3deg)}
+.tag.ok{background:var(--green)}
+.demo{display:flex;justify-content:space-between;gap:12px;margin-top:14px;font-size:13px;color:var(--mute)}
+.demo span:last-child{font:600 11px/1.4 var(--fb);letter-spacing:.1em;color:var(--orange)}
+
+/* sección del prompt */
+.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}
+.how .lead{margin-top:10px}
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}
+.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.steps span{color:var(--mute);font-size:14.5px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy.ok{background:var(--green)}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}
+.warn b{color:var(--orange)}
+.extra{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px;font-size:14.5px;color:var(--mute)}
+.extra b{color:var(--ink)}
+.sig{color:var(--mute);font-size:13px;text-align:center}
+.sig b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.crit .b i,.marks ellipse,.tag,.ph{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · POST</div>
+    <h1>Destructor de posts. <em>¿Qué nota saca el tuyo?</em></h1>
+    <p class="lead">Pega tu post y descubre su nota real y cómo quedaría para sacar un 9. Antes, toca uno de estos tres de ejemplo.</p>
+  </header>
+
+  <section aria-label="Demo del destructor de posts">
+    <div class="pick" id="pick" role="group" aria-label="Post de ejemplo"></div>
+    <div class="toggle" role="group" aria-label="Antes o después">
+      <button type="button" data-v="before" aria-pressed="true">ANTES</button>
+      <button type="button" data-v="after" aria-pressed="false">DESPUÉS</button>
+    </div>
+    <div class="score"><div class="big" id="big">10<small>/10</small></div><div class="verdict" id="verdict"></div></div>
+    <div class="crit" id="crit"></div>
+    <article class="ig">
+      <div class="ig-h"><div class="av"><div id="avi"></div></div><div><b id="user"></b><span id="bizname"></span></div></div>
+      <div class="ph" id="ph"></div>
+      <div class="ig-a" aria-hidden="true">♡ ◯ ➤</div>
+      <div class="ig-l" id="likes"></div>
+      <div class="cap" id="cap"></div>
+      <svg class="marks" id="marks" aria-hidden="true"></svg>
+      <div class="tag" id="t0"></div><div class="tag" id="t1"></div><div class="tag" id="t2"></div>
+    </article>
+    <div class="demo"><span>Toca ANTES / DESPUÉS para ver la versión reescrita.</span><span>DEMO · DATOS FICTICIOS</span></div>
+  </section>
+
+  <section class="how" aria-label="Cómo puntuar el tuyo">
+    <h2>Destroza el tuyo en 3 pasos</h2>
+    <p class="lead">Claude te devuelve una página con la nota, la puntuación por criterio y tu post reescrito, listo para copiar.</p>
+    <ol class="steps">
+      <li><div class="dot">1</div><div class="t"><b>Copia tu post</b><span>Copia el texto de tu post y haz captura de la foto.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>Pégalo en Claude</b><span>Pega el prompt en Claude con tus datos y adjunta la foto.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>Copia la versión nueva</b><span>Abre la página que te devuelve y copia el texto reescrito.</span></div></li>
+    </ol>
+
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt para tu post</span><button class="copy" id="copy" type="button">Copiar prompt</button></div>
+      <pre id="prompt">Actúa como el crítico más exigente de Instagram para negocios locales. Mi negocio es [tipo de negocio] en [ciudad]. Este es mi post: texto [pega aquí el texto] y foto [adjúntala o descríbela].
+
+Puntúalo de 0 a 10 en 5 criterios: gancho de la primera línea, foto, claridad de lo que ofrezco, dato o precio concreto y llamada a la acción. Sé sincero y no suavices.
+
+Después reescríbelo para que saque un 9: texto nuevo, 3 ganchos alternativos y qué cambiar de la foto.
+
+Devuélveme UNA página HTML lista para abrir con la nota grande, la puntuación por criterio en barras, el antes y el después lado a lado y un botón para copiar el texto nuevo.</pre>
+    </div>
+
+    <p class="warn"><b>Revísalo antes de publicarlo.</b> Comprueba precios, horarios y promesas del texto nuevo: la IA puede inventar detalles que no le has dado.</p>
+  </section>
+
+  <p class="extra"><b>¿Te atreves de verdad?</b> Mándame tu post por privado y lo destrozo (con cariño) en un próximo vídeo.</p>
+
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+
+<script>
+(function(){
+  var CRIT=['Gancho','Foto','Claridad','Dato o precio','Llamada a la acción'];
+  var P=[
+    {k:'pan',lbl:'Panadería',user:'panaderiamiga',biz:'Panadería Miga',av:'#7a4a24',emoji:'🍞',bg:'linear-gradient(160deg,#f6e2bf,#d9a46d)',
+     before:{score:3,c:[2,2,4,3,3],likes:'12 Me gusta',dark:true,verdict:'Foto oscura, texto largo y ninguna razón para ir.',
+       cap:'Buenos días a todos!! Hoy como siempre tenemos nuestro pan recién hecho y muchas cosas más, también bollería y otras cosas, os esperamos como siempre en la panadería, gracias por confiar en nosotros un día más!!',
+       tags:['FOTO OSCURA','5 LÍNEAS','SIN MOTIVO']},
+     after:{score:9,c:[9,9,9,10,9],likes:'Vista previa · reescrito',dark:false,verdict:'Gancho con urgencia, precio claro y una sola acción.',
+       cap:'Sale del horno a las 8:00 y a las 10:00 ya no queda. Hogaza de masa madre · 3,80 €. Resérvala por mensaje y te la guardamos.',
+       tags:['FOTO CON LUZ','GANCHO + PRECIO','1 LLAMADA']}},
+    {k:'pelu',lbl:'Peluquería',user:'estudiolia',biz:'Estudio Lía · Peluquería',av:'#962fbf',emoji:'💇‍♀️',bg:'linear-gradient(160deg,#fde3ef,#c9a7f0)',
+     before:{score:5,c:[5,7,5,3,5],likes:'31 Me gusta',dark:false,verdict:'Buena foto, pero el texto no dice qué ofreces ni cuánto cuesta.',
+       cap:'Nuevo look para nuestra clienta ✨✨ #peluqueria #pelo #look #estilo #belleza #cortedepelo #mechas',
+       tags:['SIN GANCHO','SOLO HASHTAGS','SIN PRECIO']},
+     after:{score:9,c:[9,8,9,9,9],likes:'Vista previa · reescrito',dark:false,verdict:'Habla del problema de la clienta y le pone precio y plazo.',
+       cap:'¿Puntas abiertas desde el verano? Corte + hidratación en 45 min · 35 €. Escríbenos «CITA» y te damos hueco esta semana.',
+       tags:['ANTES/DESPUÉS','PROBLEMA + PRECIO','1 LLAMADA']}},
+    {k:'ropa',lbl:'Tienda de ropa',user:'lolamoda.tienda',biz:'Lola Moda',av:'#d62976',emoji:'🧥',bg:'linear-gradient(160deg,#e6eefc,#9fb8e6)',
+     before:{score:4,c:[4,6,4,2,4],likes:'19 Me gusta',dark:false,verdict:'Mucho emoji y nada concreto: ni prenda, ni tallas, ni precio.',
+       cap:'Ya ha llegado la nueva colección!! Pasaos a verla, hay de todo y muy bonito 😍😍😍',
+       tags:['FOTO GENÉRICA','NADA CONCRETO','SIN PRECIO']},
+     after:{score:8,c:[8,8,9,9,8],likes:'Vista previa · reescrito',dark:false,verdict:'Una prenda, sus tallas y su precio. Fácil de decidir.',
+       cap:'El abrigo de lana que más nos pedisteis ha vuelto. Tallas S–XL · 59 €. Comenta «ABRIGO» y te lo apartamos 48 h.',
+       tags:['1 PRENDA','TALLAS + PRECIO','1 LLAMADA']}}
+  ];
+  var cur=0, view='before', shown=10, timer=null;
+  var $=function(id){return document.getElementById(id)};
+  var pick=$('pick'), big=$('big'), crit=$('crit'), marks=$('marks');
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+
+  crit.innerHTML=CRIT.map(function(c){return '<div class="r"><span>'+c+'</span><div class="b"><i></i></div><span>0</span></div>'}).join('');
+
+  function count(to){
+    clearInterval(timer);
+    var from=shown, step=from>to?-1:1;
+    if(from===to){paintBig(to);return}
+    timer=setInterval(function(){
+      shown+=step; paintBig(shown);
+      if(shown===to){clearInterval(timer)}
+    },70);
+  }
+  function paintBig(n){
+    big.innerHTML=n+'<small>/10</small>';
+    big.classList.toggle('bad',n<=5);
+  }
+  function layoutMarks(){
+    // óvalos sobre la foto, el texto y el final del texto (en píxeles del post)
+    var ig=document.querySelector('.ig'), W=ig.offsetWidth, H=ig.offsetHeight, ph=$('ph'), cap=$('cap');
+    var pT=ph.offsetTop, pH=ph.offsetHeight, cT=cap.offsetTop, cH=cap.offsetHeight;
+    marks.setAttribute('viewBox','0 0 '+W+' '+H);
+    marks.innerHTML=
+      '<ellipse pathLength="1" cx="'+W/2+'" cy="'+(pT+pH/2)+'" rx="'+(W*.47)+'" ry="'+(pH/2-4)+'"/>'+
+      '<ellipse pathLength="1" cx="'+W/2+'" cy="'+(cT+cH*.45)+'" rx="'+(W*.49)+'" ry="'+(cH*.4)+'"/>'+
+      '<ellipse pathLength="1" cx="'+W*.7+'" cy="'+(cT+cH*.86)+'" rx="'+(W*.28)+'" ry="'+(cH*.16)+'"/>';
+    $('t0').style.cssText='right:12px;top:'+(pT+12)+'px';
+    $('t1').style.cssText='right:10px;top:'+(cT-30)+'px';
+    $('t2').style.cssText='right:10px;top:'+(cT+cH-30)+'px';
+  }
+  function render(){
+    var p=P[cur], v=p[view];
+    $('avi').textContent=p.biz.charAt(0); $('avi').style.background=p.av;
+    $('user').textContent=p.user; $('bizname').textContent=p.biz;
+    var ph=$('ph'); ph.textContent=p.emoji; ph.style.background=p.bg; ph.classList.toggle('dark',v.dark);
+    $('likes').textContent=v.likes;
+    $('cap').innerHTML='<b>'+esc(p.user)+'</b> '+esc(v.cap);
+    $('verdict').textContent=v.verdict;
+    Array.prototype.forEach.call(crit.children,function(r,i){
+      var val=v.c[i], bar=r.querySelector('i');
+      bar.style.width=(val*10)+'%'; bar.style.background=val>=7?'var(--blue)':val>=5?'var(--orange)':'var(--red)';
+      r.lastElementChild.textContent=val;
+    });
+    [0,1,2].forEach(function(i){var t=$('t'+i);t.textContent=v.tags[i];t.classList.toggle('ok',view==='after')});
+    marks.classList.remove('on');
+    layoutMarks();
+    marks.style.display=view==='after'?'none':'';
+    requestAnimationFrame(function(){requestAnimationFrame(function(){marks.classList.add('on')})});
+    count(v.score);
+    Array.prototype.forEach.call(pick.children,function(b,i){b.setAttribute('aria-pressed',i===cur?'true':'false')});
+    document.querySelectorAll('.toggle button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.v===view?'true':'false')});
+  }
+  P.forEach(function(p,i){
+    var b=document.createElement('button'); b.type='button'; b.textContent=p.lbl;
+    b.addEventListener('click',function(){cur=i;view='before';shown=10;render()});
+    pick.appendChild(b);
+  });
+  document.querySelectorAll('.toggle button').forEach(function(b){
+    b.addEventListener('click',function(){view=b.dataset.v;render()});
+  });
+  window.addEventListener('resize',layoutMarks);
+  render();
+
+  var btn=$('copy'), pre=$('prompt');
+  function done(){btn.textContent='Copiado';btn.classList.add('ok');setTimeout(function(){btn.textContent='Copiar prompt';btn.classList.remove('ok')},2200)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selecciona y copia';setTimeout(function(){btn.textContent='Copiar prompt'},2600)}
+  btn.addEventListener('click',function(){
+    var txt=pre.innerText;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}
+  });
+})();
+</script>
+</body>
+</html>
