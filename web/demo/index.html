@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ÉTER 01 · Escucha sin ruido</title>
+<meta name="description" content="Landing de demostración con marca y producto ficticios. Creada con IA como ejemplo de dirección visual.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<canvas id="stage" aria-hidden="true"></canvas>
+
+<header class="nav">
+  <a class="brand" href="#hero">ÉTER</a>
+  <ul><li><a href="#story">Diseño</a></li><li><a href="#parts">Por dentro</a></li><li><a href="#why">Motivos</a></li></ul>
+  <a class="pill" href="#end">Reservar</a>
+</header>
+
+<main>
+  <section id="hero" class="sec hero">
+    <p class="kicker" data-intro="0.55">Éter 01 · Auriculares de estudio</p>
+    <h1 class="h1"><span class="line"><span data-intro="0.05">Escucha</span></span><span class="line"><span data-intro="0.2">sin ruido.</span></span></h1>
+    <p class="lead front" data-intro="0.75">Cancelación adaptativa, 40 horas de batería y un chasis de aluminio mecanizado de una sola pieza.</p>
+    <div class="cta-row front" data-intro="0.9">
+      <a class="btn btn-main" href="#end">Reservar el 01 · 249 €</a>
+      <a class="btn btn-ghost" href="#parts">Ver por dentro →</a>
+    </div>
+    <p class="demo front" data-intro="1">Demo · datos ficticios</p>
+    <p class="cue front" data-intro="1.05">Desliza ↓</p>
+  </section>
+  <div class="hero-pad"></div>
+
+  <section id="story" class="sec story">
+    <div class="story-in">
+      <p class="kicker" data-r>01 — Diseño</p>
+      <h2 class="h2"><span class="line"><span data-r data-d="0">Diseñado</span></span><span class="line"><span data-r data-d=".18">para desaparecer.</span></span></h2>
+      <p class="body" data-r data-d=".35">Un arco que reparte el peso, almohadillas de espuma viscoelástica y un chasis sin tornillos a la vista. Menos que notar, más que escuchar.</p>
+      <ul class="stats">
+        <li data-r data-d=".45"><b>40 h</b><span>de batería</span></li>
+        <li data-r data-d=".55"><b>280 g</b><span>de peso</span></li>
+        <li data-r data-d=".65"><b>−42 dB</b><span>de aislamiento</span></li>
+      </ul>
+      <p class="demo demo-l" data-r data-d=".75">Demo · datos ficticios</p>
+    </div>
+  </section>
+
+  <section id="parts" class="sec parts">
+    <div class="sticky">
+      <p class="kicker">02 — Por dentro</p>
+      <h2 class="h2"><span class="line"><span>Cada pieza,</span></span><span class="line"><span>en su sitio.</span></span></h2>
+      <p class="hint">Sigue bajando</p>
+    </div>
+  </section>
+
+  <section id="why" class="sec why">
+    <ol class="why-list">
+      <li data-r><span class="n">01</span><div><h3>Silencio que se adapta</h3><p>Cuatro micrófonos leen el ruido de la calle y ajustan la cancelación cada segundo.</p></div></li>
+      <li data-r data-d=".2"><span class="n">02</span><div><h3>Cuarenta horas de calma</h3><p>Una carga rápida de diez minutos te da tres horas de escucha.</p></div></li>
+      <li data-r data-d=".4"><span class="n">03</span><div><h3>Se pliega como tu agenda</h3><p>Arco articulado y funda rígida: cabe en el bolsillo de la chaqueta.</p></div></li>
+    </ol>
+    <p class="kicker" data-r>03 — Motivos · demo · datos ficticios</p>
+  </section>
+
+  <section id="end" class="sec end">
+    <h2 class="h2"><span class="line"><span data-r>Tu silencio,</span></span><span class="line"><span data-r data-d=".2">listo para enviar.</span></span></h2>
+    <div class="cta-row" data-r data-d=".45"><a class="btn btn-main" href="#hero">Reservar el 01 · 249 €</a></div>
+    <p class="fine" data-r data-d=".6">Envío en 48 h · 30 días para devolverlo · Demo · datos ficticios</p>
+    <footer class="foot" data-r data-d=".7"><span>© 2026 ÉTER</span><span>Marca y datos ficticios, creados como demostración por InfiniBot</span></footer>
+  </section>
+</main>
+
+<div id="co-layer" aria-hidden="true">
+  <div class="co r" data-co="band"><i></i><span><b>Arco de aluminio</b>38 g · una sola pieza</span></div>
+  <div class="co r" data-co="yoke"><i></i><span><b>Brazo articulado</b>acero inoxidable</span></div>
+  <div class="co l" data-co="plate"><i></i><span><b>Tapa mecanizada</b>aluminio anodizado</span></div>
+  <div class="co l" data-co="cup"><i></i><span><b>Chasis sin tornillos</b>cierre magnético</span></div>
+  <div class="co d" data-co="cush"><i></i><span><b>Espuma viscoelástica</b>dos capas y funda de piel</span></div>
+</div>
+
+<script type="module">
+import * as THREE from "./vendor/three.module.min.js";
+window.THREE = THREE;
+var s = document.createElement("script"); s.src = "js/app.js"; document.body.appendChild(s);
+</script>
+</body>
+</html>

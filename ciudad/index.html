@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Una maqueta 3D de una ciudad que cambia de hora, hecha con IA, y el prompt para crear la tuya.">
+<meta property="og:title" content="Ciudad 3D · hecha con IA">
+<meta property="og:description" content="Una maqueta 3D de una ciudad que cambia de hora, hecha con IA, y el prompt para crear la tuya.">
+<title>Ciudad 3D · hecha con IA</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+
+/* Layout: página oscura de marca (marino + azul eléctrico) con una carta clara de papel en el centro, como la de una mesa. */
+:root{
+  color-scheme:dark;
+  --bg:#07101F; --panel:#0E1C36; --line:#1d3358; --ink:#F4F7FB; --mute:#9db0cc;
+  --blue:#2F7BFF; --blue-soft:#7fb0ff; --orange:#FF7A1A;
+  --paper:#F4F7FB; --paper-ink:#0b1730; --paper-mute:#566680; --paper-line:#cfd9e8;
+  --fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}
+h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+
+
+
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+.stage{position:relative;width:100%;background:#050b16;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.stage iframe,.stage canvas,.stage video{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.stage video{object-fit:cover;background:#000}
+.load{position:absolute;inset:0;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(120% 80% at 50% 0%,#12306a 0%,#07101F 70%);color:var(--ink);border:0;cursor:pointer;font:700 22px/1.15 var(--fd);padding:24px;text-align:center}
+.load i{font-style:normal;width:64px;height:64px;border-radius:50%;background:var(--blue);display:grid;place-items:center;font-size:24px;padding-left:4px}
+.load small{font:500 14px/1.3 var(--fb);color:var(--mute)}
+.links{display:flex;flex-wrap:wrap;gap:8px 18px;margin:12px 2px 0}
+.links a{color:var(--blue-soft);font-size:14px;font-weight:600;min-height:44px;display:inline-flex;align-items:center}
+.demo{font:600 11px/1 var(--fb);letter-spacing:.1em;color:var(--orange)}
+
+
+/* sección del prompt */
+.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}
+.how .lead{margin-top:10px}
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}
+.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.steps span{color:var(--mute);font-size:14.5px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy:hover{filter:brightness(1.1)}
+.copy.ok{background:#1f9d62}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}
+.warn b{color:var(--orange)}
+.sig{color:var(--mute);font-size:13px;text-align:center}
+.sig b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){#menuBody,.langs button{transition:none}}
+
+@media print{}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · CIUDAD</div>
+    <h1>Mueve la hora. <em>Mira la ciudad cambiar.</em></h1>
+    <p class="lead">Esta ciudad en miniatura está hecha con código por una IA: se construye pieza a pieza y pasa del día a la noche. Muévela y copia el prompt para hacer la tuya.</p>
+  </header>
+
+  <section aria-label="Demo">
+    <div class="stage" style="aspect-ratio:4/5">
+      <button class="load" id="load" type="button"><i>▶</i><span>Abrir la ciudad en 3D</span><small>Arrastra para girar · desliza la hora · pesa unos 600 KB</small></button>
+      <iframe id="frame" data-src="visor/index.html" title="Abrir la ciudad en 3D" hidden allow="fullscreen"></iframe>
+    </div>
+    <div class="links"><a href="visor/index.html" target="_blank" rel="noopener">Abrir la ciudad a pantalla completa ↗</a></div>
+    <p class="hint" style="color:var(--mute);font-size:14px;margin:6px 2px 0">Es 3D en tiempo real: en móviles antiguos puede ir lenta. Mejor en ordenador.</p>
+  </section>
+
+  <section class="how" aria-label="Cómo hacer el tuyo">
+    <h2>Haz la tuya en 3 pasos</h2>
+    <p class="lead">Hace falta un ordenador con Node.js 22 o superior. Claude se encarga del resto.</p>
+    <ol class="steps">
+      <li><div class="dot">1</div><div class="t"><b>Copia el prompt</b><span>Es el de abajo. Cambia solo lo que va entre corchetes: estilo, marca y color.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>Pégalo en Claude Code</b><span>En una carpeta vacía. No saldrá idéntica ni a la primera: es normal.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>Pide retoques concretos</b><span>«Más árboles en la plaza», «luces más cálidas de noche»… hasta que te guste.</span></div></li>
+    </ol>
+
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt para tu ciudad</span><button class="copy" id="copy" type="button">Copiar prompt</button></div>
+      <pre id="prompt">Construye desde cero, en esta carpeta, una MAQUETA 3D de una ciudad europea en miniatura con Three.js, que parezca una maqueta
+arquitectónica física fotografiada en estudio (no un videojuego, no Minecraft, no low-poly básico, no futurista). Debe poder
+verse con doble clic en index.html, construirse pieza a pieza, cobrar vida y pasar del día a la noche con luces reales.
+Estilo y ciudad: [mediterránea/europea contemporánea]. Marca de la peana: [tu marca]. Paleta de acento: [azul eléctrico #2F7BFF].
+
+REGLAS GENERALES
+- Three.js 0.170.0 y esbuild 0.24.0, versiones EXACTAS (npm install --save-exact) y package-lock.json conservado. Sin CDN.
+- NADA externo: ni imágenes, ni modelos, ni fuentes de texturas. Texturas y geometrías, por código, con una semilla fija.
+- Determinista: una función aplicar(estado) pura. Prohibido Math.random(), Date.now() y performance.now() en la escena;
+  el reloj de las animaciones es un número `t` que llega en el estado. Mismo estado = mismo fotograma.
+- Empaqueta con esbuild (format iife) en dist/ciudad.bundle.js y expón window.CIUDAD = { crear(canvas, {width, height}), ESTADO0 }.
+  crear() devuelve { render(estado) }. index.html carga ese script clásico, así que funciona abriéndolo con doble clic (file://).
+- Módulos: src/util.js (semilla, easing), src/texturas.js, src/edificio.js, src/urbano.js, src/ciudad.js, src/index.js.
+  Al fusionar geometrías con mergeGeometries, conviértelas antes a no indexadas y deja solo los atributos comunes
+  (RoundedBoxGeometry, BoxGeometry e Icosaedro no comparten formato).
+
+LA MAQUETA (unidades: 1 unidad ≈ 3 m)
+- Peana de madera 25 × 25 con tablero de piedra clara y placa de latón en la cara frontal con texto (textura de lienzo).
+- Plaza central de adoquín (cuadrado de 8 con esquinas redondeadas), fuente de piedra de dos pilas con agua y ondas animadas,
+  4 macizos de césped con seto bajo y un árbol cada uno, bancos mirando a la fuente, macetas, farolas de hierro.
+- Anillo de calzada alrededor de la plaza (borde interior ±4,0 y exterior ±6,2, esquinas redondeadas) con asfalto con grano,
+  línea de puntos central y pasos de peatones en el centro de cada lado; aceras de losas de 0,8 con bordillo y árboles en alcorques.
+- 16 edificios de 3 a 5 plantas (altura de planta 0,95) alrededor del anillo: 3 por cada lado y 4 en las esquinas.
+  OJO con el trazado: las filas llegan hasta la esquina de la acera y por eso las esquinas son edificios cuadrados con
+  fachada solo hacia fuera. Si recortas la esquina interior, la fachada queda encerrada en un patinillo.
+- Dos comercios con interior iluminado: una cafetería con terraza (mesas, sillas y sombrillas en la acera) y una librería;
+  además una pastelería. Rótulos con texto (lienzo) y toldos a rayas que se despliegan.
+
+EDIFICIOS (cada uno con identidad propia, nada repetido)
+- Fachada de estuco con textura procedural y bump (o ladrillo), zócalo de piedra, impostas en cada planta, cornisa con
+  modillones, pilastras en las esquinas. Paleta mediterránea: ocre, terracota, crema, salmón, salvia, celeste, mostaza, rosa.
+- Ventanas con marco, dintel, alféizar y cruceta; contraventanas con lamas, algunas abiertas en ángulos distintos o cerradas
+  (semilla); balcones de hierro con barandilla y balaustres en plantas elegidas; puertas de madera con montante de cristal y escalones.
+- Cristales con interior pintado (cortinas, luz de techo) y emisivos: un atributo aleatorio por ventana (aWin) y un uniforme
+  global uNight en onBeforeCompile hacen que se enciendan de una en una según la hora.
+- Tejados a cuatro aguas con teja procedural (textura de tejas curvas con bump), cumbrera, chimeneas de ladrillo con remates y
+  buhardillas; pirámide en las esquinas; pizarra oscura en alguno. Sin azoteas planas vacías.
+- Oclusión ambiental falsa: una franja oscura con degradado al pie de cada fachada.
+
+MATERIALES Y LUZ
+- MeshStandardMaterial / MeshPhysicalMaterial con roughness, bump y envMapIntensity ajustados; coches con laca (clearcoat).
+- Sol: DirectionalLight con sombras (2048, PCFSoftShadowMap, normalBias 0,035) + HemisphereLight + entorno RoomEnvironment por PMREM
+  + una luz lunar azul para la noche. Tabla de claves por HORA (15,0 a 21,3): elevación y azimut del sol, color, intensidad,
+  colores de cielo, luz ambiental, exposición, brillo, nivel de ventanas encendidas y de farolas. Interpola con smoothstep.
+  Usa un sol más alto de lo real (30–45° en la hora dorada): con un sol físico bajo, los edificios dejan toda la plaza en sombra.
+- Noche con luces REALES: PointLight cálida (distance 5,2, decay 1,7) en 8 farolas, bombillas con color HDR, halos aditivos,
+  faros y pilotos de los coches, escaparates y rótulos emisivos. Prohibido simular la noche con un filtro azul encima.
+- Fondo de estudio: suelo grande con degradado radial muy oscuro (azul marino de marca) y esfera de cielo enorme (radio 600,
+  cámara far 1400) para que no se vea ningún borde.
+- Postproceso con EffectComposer (HalfFloatType, samples 4): tilt-shift en dos pasadas (más desenfoque arriba y abajo), viñeta,
+  UnrealBloomPass (más fuerte de noche) y OutputPass con ACESFilmic.
+
+ANIMACIÓN (todo función de `build` 0–1, `hora` y `t`)
+- CONSTRUCCIÓN: la calzada se pinta con un plano de recorte que avanza; aceras y plaza suben; cada edificio sube planta a
+  planta con un plano de recorte local (material.clippingPlanes, clipShadows true, renderer.localClippingEnabled) y sus ventanas
+  aparecen al llegar el muro; el tejado cae y se posa con un pequeño giro; toldos y rótulos se despliegan; luego crecen los
+  árboles, caen bancos y farolas con rebote y aparecen los coches. Nada de cubos que escalan.
+- VIDA: 4 coches (redondeados, con cristales y ruedas) que recorren el anillo por longitud de arco, por su derecha y con las
+  esquinas redondeadas (nunca atraviesan edificios); árboles que se balancean; fuente con ondas.
+- CÁMARA: perspectiva con fov 26, orbital (az, el, dist, objetivo) más un modo libre a ras de calle y un desplazamiento
+  vertical del encuadre (setViewOffset) para dejar sitio a un titular.
+
+VISOR Y EXPORTACIÓN
+- index.html: deslizadores de hora y construcción, arrastrar para girar, rueda para acercar, «Guardar PNG», y un modo
+  determinista con parámetros de URL (?est=1&amp;hora=…&amp;build=…&amp;az=…&amp;el=…&amp;dist=…&amp;t=…).
+- Ejemplo de vídeo en exportar/ con HyperFrames 0.8.143 (`npx hyperframes@0.8.143 render`): composición de 1080×1350, 30 fps,
+  sin audio; un timeline GSAP en pausa mueve el estado y en cada evento «hf-seek» se llama a render(estado).
+- README.md con ejecutar, personalizar (edificios, colores, calles, hora, cámara), animaciones, exportar y problemas comunes.
+
+CRITERIOS DE CALIDAD Y COMPROBACIONES (no des nada por terminado sin hacerlas)
+1. Abre la escena con Chrome headless (puppeteer-core o chrome-headless-shell con SwiftShader) y haz capturas a 1080×1350 de:
+   hora dorada, atardecer, noche, construcción al 30 %, 60 % y 100 %, y tres planos a ras de calle. MÍRALAS una a una.
+2. Pregúntate en cada una: «¿parece una maqueta de estudio o un videojuego barato?». Corrige luz, materiales y composición y repite.
+3. Cero errores en la consola. Mide los milisegundos por fotograma (con GL por software, del orden de 1 s) y ajusta la cantidad
+   de luces, sombras y geometría si se dispara.
+4. Cada fachada que da a la plaza debe verse completa y detallada; ningún coche atraviesa un edificio; las ventanas se encienden
+   de forma escalonada y las sombras se mueven coherentes con la hora.
+5. Prueba el proyecto en una carpeta limpia: npm install, npm run build, abrir index.html y generar al menos un fotograma o un clip.
+6. Entrega un resumen de lo que has comprobado y de lo que no.</pre>
+    </div>
+
+    <p class="warn"><b>Revísalo antes de usarlo.</b> Es un proyecto largo y pesado para una IA: revisa que lo probó de verdad (que construye y se abre) y no te fíes solo de su resumen.</p>
+  </section>
+
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+<script>
+
+(function(){
+  var b=document.getElementById('load'), f=document.getElementById('frame');
+  b.addEventListener('click',function(){f.src=f.dataset.src;f.hidden=false;b.hidden=true;f.focus&&f.focus()});
+})();
+
+
+(function(){
+  var btn=document.getElementById('copy'), pre=document.getElementById('prompt');
+  function done(){btn.textContent='Copiado';btn.classList.add('ok');setTimeout(function(){btn.textContent='Copiar prompt';btn.classList.remove('ok')},2200)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selecciona y copia';setTimeout(function(){btn.textContent='Copiar prompt'},2600)}
+  btn.addEventListener('click',function(){
+    var txt=pre.innerText;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}
+  });
+})();
+
+</script>
+</body>
+</html>

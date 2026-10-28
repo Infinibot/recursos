@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Una landing de marca ficticia con producto 3D hecha por una IA, y el prompt para crear la tuya.">
+<meta property="og:title" content="Web con producto 3D · hecha con IA">
+<meta property="og:description" content="Una landing de marca ficticia con producto 3D hecha por una IA, y el prompt para crear la tuya.">
+<title>Web con producto 3D · hecha con IA</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+
+/* Layout: página oscura de marca (marino + azul eléctrico) con una carta clara de papel en el centro, como la de una mesa. */
+:root{
+  color-scheme:dark;
+  --bg:#07101F; --panel:#0E1C36; --line:#1d3358; --ink:#F4F7FB; --mute:#9db0cc;
+  --blue:#2F7BFF; --blue-soft:#7fb0ff; --orange:#FF7A1A;
+  --paper:#F4F7FB; --paper-ink:#0b1730; --paper-mute:#566680; --paper-line:#cfd9e8;
+  --fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}
+h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+
+
+
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+.stage{position:relative;width:100%;background:#050b16;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.stage iframe,.stage canvas,.stage video{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.stage video{object-fit:cover;background:#000}
+.load{position:absolute;inset:0;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(120% 80% at 50% 0%,#12306a 0%,#07101F 70%);color:var(--ink);border:0;cursor:pointer;font:700 22px/1.15 var(--fd);padding:24px;text-align:center}
+.load i{font-style:normal;width:64px;height:64px;border-radius:50%;background:var(--blue);display:grid;place-items:center;font-size:24px;padding-left:4px}
+.load small{font:500 14px/1.3 var(--fb);color:var(--mute)}
+.links{display:flex;flex-wrap:wrap;gap:8px 18px;margin:12px 2px 0}
+.links a{color:var(--blue-soft);font-size:14px;font-weight:600;min-height:44px;display:inline-flex;align-items:center}
+.demo{font:600 11px/1 var(--fb);letter-spacing:.1em;color:var(--orange)}
+
+
+/* sección del prompt */
+.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}
+.how .lead{margin-top:10px}
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}
+.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.steps span{color:var(--mute);font-size:14.5px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy:hover{filter:brightness(1.1)}
+.copy.ok{background:#1f9d62}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}
+.warn b{color:var(--orange)}
+.sig{color:var(--mute);font-size:13px;text-align:center}
+.sig b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){#menuBody,.langs button{transition:none}}
+
+@media print{}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · WEB</div>
+    <h1>Desliza la web. <em>Mira el producto girar.</em></h1>
+    <p class="lead">Esta landing, de una marca y un producto inventados, la hizo una IA de una sola vez. Ábrela, desliza dentro del marco y copia el prompt para hacer la tuya.</p>
+  </header>
+
+  <section aria-label="Demo">
+    <div class="stage" style="aspect-ratio:9/19;max-width:400px;margin:0 auto">
+      <button class="load" id="load" type="button"><i>▶</i><span>Abrir la web de ejemplo</span><small>Desliza dentro del marco · DEMO · DATOS FICTICIOS</small></button>
+      <iframe id="frame" data-src="demo/index.html" title="Abrir la web de ejemplo" hidden allow="fullscreen"></iframe>
+    </div>
+    <div class="links"><a href="demo/index.html" target="_blank" rel="noopener">Abrir la web a pantalla completa ↗</a></div>
+  </section>
+
+  <section class="how" aria-label="Cómo hacer el tuyo">
+    <h2>Haz la tuya en 3 pasos</h2>
+    <p class="lead">Sin saber programar. Claude te devuelve una carpeta con tu web, que se abre con doble clic.</p>
+    <ol class="steps">
+      <li><div class="dot">1</div><div class="t"><b>Copia el prompt</b><span>Es el de abajo. Cambia solo lo que va entre corchetes: marca, producto y promesa.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>Pégalo en Claude Code</b><span>O en otro agente que pueda crear y ejecutar archivos. Luego itera con correcciones concretas.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>Revisa y publícala</b><span>Pídele que te explique cómo subirla a un alojamiento gratuito.</span></div></li>
+    </ol>
+
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt para tu web</span><button class="copy" id="copy" type="button">Copiar prompt</button></div>
+      <pre id="prompt">Actúa como director creativo y desarrollador front-end. Crea una landing de UNA sola página para una marca y un producto
+FICTICIOS. Marca: [NOMBRE DE MARCA INVENTADO]. Producto: [PRODUCTO: p. ej. auriculares de estudio, frasco de perfume, reloj, lámpara].
+Promesa en una frase: [PROMESA]. Tono: premium, editorial, mucho aire, español de España. Nada de plantillas genéricas ni de tarjetas repetidas.
+
+ENTREGA
+- Carpeta `web/` con: index.html, css/style.css, js/app.js, vendor/three.min.js y fonts/.
+- Sin frameworks, sin CDN, sin módulos ES (`import`). Tiene que abrirse con doble clic desde file:// y funcionar sin servidor.
+- Three.js r159 en su build UMD (`build/three.min.js` del paquete npm `three@0.159.0`), guardado en vendor/. Tipografías en local:
+  Bricolage Grotesque (titulares, peso 800, tracking negativo) e Inter (texto).
+- Todo dato inventado (precios, horas, decibelios, envíos) va rotulado «DEMO · DATOS FICTICIOS». Nada de marcas ni webs reales como referencia.
+
+ESTRUCTURA (5 secciones, scroll vertical)
+1. Héroe oscuro (100vh + un tramo oscuro de relleno): barra fija con la marca y 3 enlaces, kicker, titular gigante de dos líneas DETRÁS del
+   producto (el producto 3D lo tapa un poco: da profundidad), una frase de apoyo, botón principal y botón secundario.
+2. Editorial clara (fondo papel #efeae1): titular grande, un párrafo corto y tres cifras grandes. El producto pasa a perfil a un lado.
+3. «Por dentro» (fondo claro, 340vh con escena fija `position: sticky`): el producto se DESMONTA con el scroll, pieza a pieza, con rótulos
+   que apuntan a cada pieza (nombre + dato). Al terminar, se vuelve a montar.
+4. Tres motivos numerados en una lista a un lado y el producto al otro.
+5. Cierre oscuro: titular centrado, botón grande, letra pequeña y pie con «Marca y datos ficticios».
+
+PRODUCTO 3D (un único canvas fijo `position: fixed` por encima del fondo y por debajo de los textos de interacción)
+- Modela el producto con primitivas de Three.js: ExtrudeGeometry con bisel para piezas redondeadas, TubeGeometry para arcos y brazos,
+  LatheGeometry para piezas de revolución, CylinderGeometry y TorusGeometry para detalles. Cada pieza en su propio Group para poder desmontarla.
+- Materiales PBR: metal anodizado cálido (metalness 1, roughness ~0.3), piel sintética oscura (MeshPhysicalMaterial con sheen y un poco de clearcoat),
+  tela mate. Una tapa con textura de canvas (anillos concéntricos finos + la inicial de la marca).
+- ILUMINACIÓN POR ENTORNO, no por luces sueltas: crea una escena de estudio (cúpula con degradado casi negro, cajas de luz planas con color
+  mayor que 1: una tira blanca arriba, una columna cálida a la izquierda, una fría a la derecha, filos finos blancos) y conviértela con
+  `PMREMGenerator.fromScene()` en `scene.environment`. Render con ACESFilmic y `outputColorSpace = SRGBColorSpace`.
+- Sombra de contacto falsa: un plano con textura radial (canvas) bajo el producto, visible solo sobre fondo claro.
+- Cámara en perspectiva (FOV 30°), siempre la misma; el producto se mueve y gira, no la cámara. Idle suave (giro lento y flotación).
+- Arrastrar con el puntero gira el producto y vuelve a su pose con inercia.
+
+ANIMACIÓN: TODO ES FUNCIÓN DEL SCROLL Y DEL TIEMPO
+- Una función `update(scrollY, t)` calcula el estado completo. En vivo la llama un bucle con requestAnimationFrame; no guardes estado oculto.
+- Poses clave del producto (posición como fracción del ancho/alto visible, escala, giro, grado de despiece 0–1, opacidad de la sombra) en
+  posiciones de scroll calculadas a partir de las `offsetTop` de las secciones (así funciona con cualquier alto de pantalla). Entre poses,
+  interpolación con smoothstep.
+- Revelados por scroll: los elementos con `data-r` reciben una variable CSS `--r` (0–1) según su posición en pantalla; opacidad y
+  desplazamiento salen de esa variable. Los titulares se revelan por líneas con máscara (`overflow: hidden`). El cierre se revela por
+  progreso de sección para que siempre llegue a completarse al final de la página.
+- Los rótulos del despiece se posicionan proyectando a pantalla un `Object3D` anclado a cada pieza (`Vector3.project(camera)`).
+- La barra fija cambia de color según la sección que tiene debajo (texto claro sobre oscuro y al revés) y lleva un degradado del color del fondo.
+- API de captura (para poder grabar la web en vídeo, opcional): `window.EterPage = { ready: Promise, setState(scrollY, t, opciones) }`.
+  `setState` hace `window.scrollTo(0, y)` y llama a `update(y, t)` de forma síncrona. Con `?capture=1` se desactiva el bucle y el pixel ratio queda en 1.
+
+RESPONSIVE
+- Escritorio (≥ 821 px) y móvil (≤ 820 px). En móvil, el producto va arriba o abajo según la sección y los textos pasan a una columna;
+  los rótulos del despiece que no caben se ocultan.
+
+VERIFICACIÓN (obligatoria antes de dar el trabajo por terminado)
+- Abre index.html desde file:// con Chrome headless o similar y comprueba que no hay errores de consola ni peticiones fallidas.
+- Captura imágenes a 940×666 y a 390×844 en: héroe, editorial, despiece completo, motivos y cierre. Revisa que no haya textos cortados,
+  solapes entre rótulos y titulares, ni el producto recortado por los bordes.
+- Revisa el contraste de la barra fija sobre cada sección y que el botón del cierre llegue a verse del todo al final del scroll.
+- Entrégame un resumen corto con lo que has comprobado y lo que no.</pre>
+    </div>
+
+    <p class="warn"><b>Revísalo antes de usarlo.</b> Comprueba textos, precios y datos antes de publicarla, y que se vea bien en tu móvil. La demo usa una marca y un producto inventados.</p>
+  </section>
+
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+<script>
+
+(function(){
+  var b=document.getElementById('load'), f=document.getElementById('frame');
+  b.addEventListener('click',function(){f.src=f.dataset.src;f.hidden=false;b.hidden=true;f.focus&&f.focus()});
+})();
+
+
+(function(){
+  var btn=document.getElementById('copy'), pre=document.getElementById('prompt');
+  function done(){btn.textContent='Copiado';btn.classList.add('ok');setTimeout(function(){btn.textContent='Copiar prompt';btn.classList.remove('ok')},2200)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selecciona y copia';setTimeout(function(){btn.textContent='Copiar prompt'},2600)}
+  btn.addEventListener('click',function(){
+    var txt=pre.innerText;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}
+  });
+})();
+
+</script>
+</body>
+</html>

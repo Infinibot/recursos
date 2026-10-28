@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Juega a BLIP, un juego de un solo botón hecho por una IA, y copia el prompt para hacer el tuyo.">
+<meta property="og:title" content="BLIP · el juego hecho con IA">
+<meta property="og:description" content="Juega a BLIP, un juego de un solo botón hecho por una IA, y copia el prompt para hacer el tuyo.">
+<title>BLIP · el juego hecho con IA</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+
+/* Layout: página oscura de marca (marino + azul eléctrico) con una carta clara de papel en el centro, como la de una mesa. */
+:root{
+  color-scheme:dark;
+  --bg:#07101F; --panel:#0E1C36; --line:#1d3358; --ink:#F4F7FB; --mute:#9db0cc;
+  --blue:#2F7BFF; --blue-soft:#7fb0ff; --orange:#FF7A1A;
+  --paper:#F4F7FB; --paper-ink:#0b1730; --paper-mute:#566680; --paper-line:#cfd9e8;
+  --fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}
+h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+
+
+
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+.stage{position:relative;width:100%;background:#050b16;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.stage iframe,.stage canvas,.stage video{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.stage video{object-fit:cover;background:#000}
+.load{position:absolute;inset:0;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(120% 80% at 50% 0%,#12306a 0%,#07101F 70%);color:var(--ink);border:0;cursor:pointer;font:700 22px/1.15 var(--fd);padding:24px;text-align:center}
+.load i{font-style:normal;width:64px;height:64px;border-radius:50%;background:var(--blue);display:grid;place-items:center;font-size:24px;padding-left:4px}
+.load small{font:500 14px/1.3 var(--fb);color:var(--mute)}
+.links{display:flex;flex-wrap:wrap;gap:8px 18px;margin:12px 2px 0}
+.links a{color:var(--blue-soft);font-size:14px;font-weight:600;min-height:44px;display:inline-flex;align-items:center}
+.demo{font:600 11px/1 var(--fb);letter-spacing:.1em;color:var(--orange)}
+
+
+/* sección del prompt */
+.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}
+.how .lead{margin-top:10px}
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}
+.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.steps span{color:var(--mute);font-size:14.5px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy:hover{filter:brightness(1.1)}
+.copy.ok{background:#1f9d62}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}
+.warn b{color:var(--orange)}
+.sig{color:var(--mute);font-size:13px;text-align:center}
+.sig b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){#menuBody,.langs button{transition:none}}
+
+@media print{}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · JUEGO</div>
+    <h1>Pulsa y salta. <em>Lo hizo una IA.</em></h1>
+    <p class="lead">Este es BLIP, el juego del carrusel: un solo botón, monedas, pinchos y meta. Juega aquí mismo y debajo tienes el prompt para hacer el tuyo.</p>
+  </header>
+
+  <section aria-label="Demo">
+    <div class="stage" style="aspect-ratio:4/5">
+      <button class="load" id="load" type="button"><i>▶</i><span>Jugar a BLIP</span><small>Toca la pantalla (o espacio) para saltar</small></button>
+      <iframe id="frame" data-src="play/index.html" title="Jugar a BLIP" hidden allow="fullscreen"></iframe>
+    </div>
+    <div class="links"><a href="play/index.html" target="_blank" rel="noopener">Abrir el juego a pantalla completa ↗</a></div>
+    <p class="hint" style="color:var(--mute);font-size:14px;margin:6px 2px 0">Mantén pulsado para saltar más alto. Si pierdes las 3 vidas, toca para reiniciar.</p>
+  </section>
+
+  <section class="how" aria-label="Cómo hacer el tuyo">
+    <h2>Haz el tuyo en 3 pasos</h2>
+    <p class="lead">Sin saber programar. Claude te devuelve una carpeta con un juego que se abre con doble clic.</p>
+    <ol class="steps">
+      <li><div class="dot">1</div><div class="t"><b>Copia el prompt</b><span>Es el de abajo. Cambia el nombre, el personaje y los colores si quieres.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>Pégalo en Claude Code</b><span>O en otro agente que pueda crear archivos. Tarda unos minutos y lo prueba solo.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>Abre index.html con doble clic</b><span>Se juega en el navegador, sin instalar nada. Pide cambios concretos: más velocidad, otro personaje…</span></div></li>
+    </ol>
+
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt para tu juego</span><button class="copy" id="copy" type="button">Copiar prompt</button></div>
+      <pre id="prompt">Crea un mini juego de UN solo botón en HTML.
+Un robot pequeño corre solo hacia la derecha.
+Salta bloques y pinchos. Recoge monedas.
+Hay marcador, 3 vidas, meta y NIVEL SUPERADO.
+Estética: azul marino, azul eléctrico, naranja.
+
+NOMBRE DEL JUEGO: BLIP. Idioma de los textos: español de España.
+
+ENTREGA
+- Carpeta `juego/` con `index.html` (página, estilos y arranque) y `blip.js` (lógica y dibujo), más `fonts/` con Bricolage Grotesque e Inter si las tengo; si no, usa la tipografía del sistema.
+- Sin librerías, sin CDN, sin módulos ES, sin imágenes externas y sin sonido. Todo se dibuja con canvas 2D.
+- Debe abrirse con doble clic sobre `index.html` (file://) en Chrome, Edge o Firefox, sin servidor.
+- `blip.js` es un script clásico que define `window.Blip` y, si existe `module`, también lo exporta (para probarlo con Node).
+
+ARQUITECTURA (obligatoria)
+- Separa la lógica del dibujo: `Blip.create(semilla, {autostart})`, `Blip.step(estado, entrada)` y `Blip.draw(ctx, estado, opciones)`. `entrada` es un entero: bit 1 = acaba de pulsar, bit 2 = mantiene pulsado, bit 4 = clic de confirmar.
+- Simulación determinista: paso fijo de 1/60 s con acumulador en el bucle principal. Nada de `Math.random` ni de la hora en la lógica: las partículas usan un generador con semilla (mulberry32).
+- La física del jugador va en UNA función pura `phys(jugador, pulsado, mantenido)` que usan tanto el juego como el bot.
+
+PANTALLA Y MUNDO
+- Altura lógica fija de 675. Ancho lógico variable entre 540 (móvil, vertical) y 960 (escritorio), escalado para llenar la ventana. Suelo en y = 540. La cámara sigue al jugador (el jugador a 150 px del borde izquierdo) con suavizado.
+- Nivel de 4500 px. Salida en x = 60. Meta (portal) en x = 4260.
+
+FÍSICA (valores exactos)
+- Velocidad horizontal constante: 224 px/s. Gravedad: 2150 px/s². Impulso de salto: 730 px/s. Caída máxima: 1100 px/s.
+- Salto variable: si se suelta el botón mientras sube más rápido que 250 px/s, la velocidad vertical se recorta a 250 px/s.
+- Tiempo de coyote: 5 pasos. Memoria de pulsación (buffer): 6 pasos.
+- Caja de colisión del jugador: 28 × 40 px.
+- Se puede aterrizar encima de los bloques (si los pies estaban a menos de 8 px del borde superior en el paso anterior); chocar con un lateral es un golpe.
+
+OBSTÁCULOS (x = borde izquierdo)
+- Bloque 56 × 48: x = 620, 1620, 1710, 3200, 4000, 4090.
+- Torre 52 × 92: x = 1300, 2320, 3520.
+- Pinchos de 22 px de alto: x = 960 (ancho 72), 1980 (ancho 104), 3020 (ancho 72), 3720 (ancho 72). Su caja de impacto es 7 px más estrecha por cada lado y 7 px más baja.
+- Escalera en x = 2640: un bloque 64 × 44 y, pegada a su derecha, una torre 60 × 88.
+
+MONEDAS Y PUNTOS
+- 82 monedas. Líneas de 3 en x = 380, 2160 y 3340 (separadas 34 px); 2 en x = 3840. Un arco de 5 (6 en la escalera) sobre cada obstáculo.
+- Cada moneda suma 10 puntos y lanza un destello en anillo, un «+10» que sube y unas esquirlas.
+- Puntos de control en x = 1480, 2880 y 3900 (banderín que se vuelve naranja al pasarlos).
+
+VIDAS Y ESTADOS
+- 3 vidas. Un golpe: el robot se rompe en esquirlas, la pantalla vibra 0,35 s, tras 0,8 s pierde una vida y reaparece en el último punto de control con 1,4 s de parpadeo sin daño. Sin vidas: pantalla FIN DE PARTIDA con el botón REINTENTAR.
+- Al cruzar la meta corre 0,9 s más y se desvanece en el portal. Después, pantalla NIVEL SUPERADO con MONEDAS (n / 82), VIDAS (×n y +50 por cada vida que quede) y PUNTOS, y el botón JUGAR DE NUEVO. La misma tecla o un clic reinician (a partir de 0,7 s).
+- Estados: `ready` (pantalla de inicio con el título BLIP y «PULSA PARA EMPEZAR»), `play`, `dead`, `clear`, `win`, `over`.
+- Controles: Espacio, ↑, W, clic o toque. Mantener pulsado salta más alto.
+
+ESTÉTICA
+- Colores: azul marino profundo #07101F, marino #0E1C36, azul eléctrico #2F7BFF, blanco #F4F7FB y naranja #FF7A1A solo para detalles (monedas, pinchos, antena, corazones).
+- Cielo en degradado marino → azul, luna suave, skyline lejano con ventanas encendidas (azules y alguna naranja), tres capas de colinas con paralaje y un suelo oscuro con una línea azul eléctrica brillante y cuadrícula tenue.
+- Jugador: robot blanco de esquinas redondeadas, visor marino con dos ojos azules brillantes, antena con bola naranja que se mueve, pies que alternan al correr, sombra en el suelo. Aplastado al aterrizar y estirado al saltar (muelle).
+- Bloques azul marino con borde azul eléctrico y una marca naranja; pinchos naranjas con degradado; monedas naranjas que giran con un brillo.
+- Partículas solo funcionales: polvo al saltar y aterrizar, destello de moneda, esquirlas del golpe. Nada de partículas decorativas.
+- HUD: «PUNTOS» con 4 dígitos, contador de monedas y 3 corazones. Tipografías Bricolage Grotesque 800 e Inter 800.
+- Estilo premium, limpio y legible. Nada de neón excesivo.
+
+BOT Y PRUEBAS
+- `Blip.bot(estado)` devuelve la entrada de un jugador automático que mira hacia delante simulando la MISMA física: salta en el último instante en que todavía es seguro, mantiene el salto 25 pasos y solo planifica el obstáculo (o grupo pegado) que tiene delante.
+- `Blip.recordDemo(semilla)` graba una partida completa del bot, con reinicio al final. `Blip.playback(demo).stateAt(n)` devuelve el estado tras n pasos.
+- `test-bot.js` para Node: comprueba que el bot completa el nivel sin golpes, que la misma semilla da las mismas entradas, que otra semilla también gana y que sin pulsar nada se pierden las 3 vidas.
+- `index.html?autotest=1` ejecuta esa misma comprobación en el navegador a través de los controles reales (teclado y ratón) y muestra el resultado en pantalla.
+
+AL TERMINAR
+1. Ejecuta `node juego/test-bot.js` y arregla lo que falle.
+2. Dime cómo abrir el juego y qué controles tiene.
+3. Resume en cinco líneas qué has hecho y qué no.
+
+PERSONALIZACIÓN (cámbialo antes de enviar; si no, déjalo como está)
+- NOMBRE: BLIP · PERSONAJE: robot pequeño · COLOR PRINCIPAL: azul eléctrico · COLOR DE DETALLE: naranja · AMBIENTE: ciudad de noche.</pre>
+    </div>
+
+    <p class="warn"><b>Revísalo antes de usarlo.</b> La IA puede dejar fallos pequeños (un salto injusto, un texto mal puesto). Juégalo tú antes de compartirlo y pide arreglos concretos.</p>
+  </section>
+
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+<script>
+
+(function(){
+  var b=document.getElementById('load'), f=document.getElementById('frame');
+  b.addEventListener('click',function(){f.src=f.dataset.src;f.hidden=false;b.hidden=true;f.focus&&f.focus()});
+})();
+
+
+(function(){
+  var btn=document.getElementById('copy'), pre=document.getElementById('prompt');
+  function done(){btn.textContent='Copiado';btn.classList.add('ok');setTimeout(function(){btn.textContent='Copiar prompt';btn.classList.remove('ok')},2200)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selecciona y copia';setTimeout(function(){btn.textContent='Copiar prompt'},2600)}
+  btn.addEventListener('click',function(){
+    var txt=pre.innerText;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}
+  });
+})();
+
+</script>
+</body>
+</html>

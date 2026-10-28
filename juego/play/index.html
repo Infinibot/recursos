@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>BLIP · mini juego de un botón</title>
+<style>
+@font-face{font-family:"Bricolage Grotesque";src:url("fonts/BricolageGrotesque-VF.ttf") format("truetype");font-weight:200 800;font-display:block}
+@font-face{font-family:"Inter";src:url("fonts/Inter-VF.ttf") format("truetype");font-weight:100 900;font-display:block}
+html,body{margin:0;height:100%;background:#07101F;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none}
+#c{display:block;margin:0 auto;height:100%;cursor:pointer}
+#resultado{position:fixed;left:8px;top:8px;margin:0;padding:8px 10px;max-width:90vw;font:12px/1.4 ui-monospace,Consolas,monospace;color:#B7C4DE;background:rgba(7,16,31,.9);display:none;white-space:pre-wrap}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<pre id="resultado"></pre>
+<script src="blip.js"></script>
+<script>
+(function () {
+  'use strict';
+  var params = new URLSearchParams(location.search);
+  var cv = document.getElementById('c'), ctx = cv.getContext('2d');
+  var G = Blip.create(7, { autostart: false });
+  var held = false, pressedFlag = false, scale = 1, vw = 540, dpr = 1;
+  var errores = [];
+  window.addEventListener('error', function (e) { errores.push(String(e.message || e)); });
+
+  function resize() {
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    var W = window.innerWidth, H = window.innerHeight;
+    scale = H / Blip.VH;
+    vw = Math.max(540, Math.min(960, W / scale));
+    cv.style.width = (vw * scale) + 'px';
+    cv.width = Math.round(vw * scale * dpr);
+    cv.height = Math.round(H * dpr);
+  }
+  function render() { Blip.draw(ctx, G, { scale: scale * dpr, vw: vw }); }
+
+  function press() { if (!held) pressedFlag = true; held = true; }
+  function release() { held = false; }
+  var KEYS = { Space: 1, ArrowUp: 1, KeyW: 1, Enter: 1 };
+  window.addEventListener('keydown', function (e) { if (KEYS[e.code]) { e.preventDefault(); if (!e.repeat) press(); } });
+  window.addEventListener('keyup', function (e) { if (KEYS[e.code]) { e.preventDefault(); release(); } });
+  cv.addEventListener('pointerdown', function (e) { e.preventDefault(); press(); });
+  window.addEventListener('pointerup', release);
+  window.addEventListener('pointercancel', release);
+  window.addEventListener('blur', release);
+
+  function stepOnce() {
+    var inp = (pressedFlag ? 1 : 0) | (held ? 2 : 0);
+    pressedFlag = false;
+    Blip.step(G, inp);
+  }
+
+  /* ---- modos de prueba (no se usan al jugar) ---- */
+  function key(type) { window.dispatchEvent(new KeyboardEvent(type, { code: 'Space', bubbles: true })); }
+  function out(o) {
+    var el = document.getElementById('resultado');
+    el.style.display = 'block'; el.textContent = JSON.stringify(o, null, 1);
+  }
+  function autotest() {
+    // Juega el nivel entero con el bot, pero entrando por los controles reales (teclado y ratón), y comprueba la victoria y el reinicio.
+    G = Blip.create(7, { autostart: false }); G.holdLeft = 0;
+    var inicio = G.mode, pasos = 0;
+    key('keydown'); stepOnce(); key('keyup'); stepOnce();
+    var tras = G.mode, ganado = false, reinicio = false;
+    while (pasos < 6000) {
+      var b = Blip.bot(G);
+      if (G.mode === 'win' && !ganado) { ganado = true; }
+      if (b & 4) { cv.dispatchEvent(new Event('pointerdown')); stepOnce(); window.dispatchEvent(new Event('pointerup')); if (G.restarts > 0) { reinicio = true; break; } continue; }
+      if ((b & 1) || ((b & 2) && !held)) key('keydown'); else if (!(b & 2) && held) key('keyup');
+      stepOnce(); pasos++;
+      if (G.mode === 'over') break;
+    }
+    // sin tocar nada, la partida acaba perdiéndose
+    var H = Blip.create(3, { autostart: true });
+    for (var i = 0; i < 4000 && H.mode !== 'over'; i++) Blip.step(H, 0);
+    var ok = inicio === 'ready' && tras === 'play' && ganado && reinicio && H.mode === 'over' && errores.length === 0;
+    out({ ok: ok, pantallaInicial: inicio, trasPulsar: tras, nivelSuperado: ganado, reinicioConClic: reinicio, pasosSimulados: pasos, sinPulsarNada: H.mode, errores: errores });
+    document.title = ok ? 'AUTOTEST OK' : 'AUTOTEST FALLO';
+  }
+  function shot(n) {
+    // Avanza n pasos con el bot y dibuja un fotograma (para capturas de pantalla de la página real).
+    G = Blip.create(7, { autostart: true }); G.holdLeft = 0;
+    for (var i = 0; i < n; i++) Blip.step(G, Blip.bot(G));
+    render(); document.title = 'SHOT ' + n;
+  }
+
+  resize();
+  window.addEventListener('resize', function () { resize(); render(); });
+  var fontsReady = (document.fonts && document.fonts.load) ? Promise.all([document.fonts.load('800 40px "Bricolage Grotesque"'), document.fonts.load('800 14px Inter')]).catch(function () {}) : Promise.resolve();
+  fontsReady.then(function () {
+    if (params.get('autotest')) { render(); autotest(); render(); return; }
+    if (params.get('shot')) { shot(parseInt(params.get('shot'), 10) || 0); return; }
+    var last = 0, acc = 0;
+    function frame(ts) {
+      var dt = Math.min(0.1, (ts - last) / 1000); last = ts; acc += dt;
+      while (acc >= Blip.DT) { stepOnce(); acc -= Blip.DT; }
+      render();
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(function (t) { last = t; frame(t); });
+  });
+})();
+</script>
+</body>
+</html>

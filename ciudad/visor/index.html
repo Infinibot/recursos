@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ciudad · InfiniBot</title>
+<style>
+  html,body{margin:0;height:100%;background:#07101F;color:#F4F7FB;font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overflow:hidden}
+  #c{position:fixed;inset:0;width:100%;height:100%;display:block}
+  #ui{position:fixed;left:14px;bottom:14px;right:14px;display:flex;gap:18px;flex-wrap:wrap;align-items:center;background:rgba(7,16,31,.72);backdrop-filter:blur(8px);border:1px solid rgba(244,247,251,.14);border-radius:14px;padding:10px 16px}
+  #ui label{display:flex;gap:8px;align-items:center;white-space:nowrap}
+  #ui input[type=range]{width:150px;accent-color:#2F7BFF}
+  #ui b{color:#2F7BFF;min-width:3.2em;display:inline-block;text-align:right}
+  #ui button{background:#2F7BFF;border:0;color:#fff;border-radius:9px;padding:6px 12px;font:inherit;cursor:pointer}
+  #ayuda{position:fixed;top:12px;left:14px;color:rgba(244,247,251,.75);font-size:13px;text-shadow:0 1px 6px #000}
+  body.est #ui,body.est #ayuda{display:none}
+  @media(max-width:600px){#ui{gap:4px 14px;padding:6px 12px;font-size:13px}#ui input[type=range]{width:110px}#ui label:nth-child(n+3),#ui button{display:none}#ayuda{font-size:12px;right:14px}}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="ayuda">Arrastra para girar · rueda para acercar · desliza la hora para ver anochecer</div>
+<div id="ui">
+  <label>Hora <input id="hora" type="range" min="15" max="21.3" step="0.01" value="17.6"><b id="vh">17:36</b></label>
+  <label>Construcción <input id="build" type="range" min="0" max="1" step="0.005" value="1"><b id="vb">100%</b></label>
+  <label><input id="giro" type="checkbox"> Giro automático</label>
+  <label><input id="anim" type="checkbox" checked> Vida (coches y árboles)</label>
+  <button id="png">Guardar PNG</button>
+</div>
+<script src="dist/ciudad.bundle.js"></script>
+<script>
+(function () {
+  var q = new URLSearchParams(location.search), canvas = document.getElementById("c");
+  var est = q.get("est") === "1";                       // modo determinista: una sola imagen con los parámetros de la URL
+  if (est) document.body.classList.add("est");
+  var w = est ? +q.get("w") || 1080 : innerWidth, h = est ? +q.get("h") || 1350 : innerHeight;
+  canvas.width = w; canvas.height = h;
+  if (est) { canvas.style.width = w + "px"; canvas.style.height = h + "px"; canvas.style.position = "static"; }
+  var app = CIUDAD.crear(canvas, { width: w, height: h });
+  var E = Object.assign({}, CIUDAD.ESTADO0);
+  ["hora", "build", "t", "az", "el", "dist", "tx", "ty", "tz", "fov", "shift", "foco", "desenfoque", "solo", "libre", "cx", "cy", "cz"].forEach(function (k) { if (q.has(k)) E[k] = parseFloat(q.get(k)); });
+  function hhmm(x) { var h = Math.floor(x), m = Math.round((x - h) * 60); return h + ":" + String(m).padStart(2, "0"); }
+  if (est) {
+    app.render(E);
+    if (q.has("bench")) {                              // mide el coste real por fotograma (tras compilar los shaders)
+      var gl = app.renderer.getContext(), px = new Uint8Array(4), t1 = performance.now(), n = +q.get("bench") || 3;
+      for (var i = 0; i < n; i++) { E.t += 0.033; app.render(E); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px); }
+      console.log("ms por fotograma: " + ((performance.now() - t1) / n).toFixed(0));
+    }
+    document.title = "listo"; return;
+  }
+  var $ = function (id) { return document.getElementById(id); };
+  $("hora").value = E.hora; $("build").value = E.build;
+  var arrastre = null, t0 = performance.now();
+  canvas.addEventListener("pointerdown", function (e) { arrastre = [e.clientX, e.clientY]; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointerup", function () { arrastre = null; });
+  canvas.addEventListener("pointermove", function (e) {
+    if (!arrastre) return; E.az -= (e.clientX - arrastre[0]) * 0.3; E.el = Math.max(8, Math.min(80, E.el + (e.clientY - arrastre[1]) * 0.25)); arrastre = [e.clientX, e.clientY];
+  });
+  canvas.addEventListener("wheel", function (e) { e.preventDefault(); E.dist = Math.max(8, Math.min(60, E.dist * (1 + e.deltaY * 0.001))); }, { passive: false });
+  addEventListener("resize", function () { app.tamano(innerWidth, innerHeight); });
+  $("png").onclick = function () { app.render(E); var a = document.createElement("a"); a.download = "ciudad.png"; a.href = canvas.toDataURL("image/png"); a.click(); };
+  (function bucle(ahora) {
+    E.hora = parseFloat($("hora").value); E.build = parseFloat($("build").value);
+    $("vh").textContent = hhmm(E.hora); $("vb").textContent = Math.round(E.build * 100) + "%";
+    if ($("anim").checked) E.t = (ahora - t0) / 1000;
+    if ($("giro").checked) E.az += 0.12;
+    app.render(E); requestAnimationFrame(bucle);
+  })(performance.now());
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Un objeto 3D cromado que pasa de esfera a infinito, como en el carrusel, y el prompt para hacer tu propio carrusel con efecto.">
+<meta property="og:title" content="Esfera cromada que se hace infinito">
+<meta property="og:description" content="Un objeto 3D cromado que pasa de esfera a infinito, como en el carrusel, y el prompt para hacer tu propio carrusel con efecto.">
+<title>Esfera cromada que se hace infinito</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+
+/* Layout: página oscura de marca (marino + azul eléctrico) con una carta clara de papel en el centro, como la de una mesa. */
+:root{
+  color-scheme:dark;
+  --bg:#07101F; --panel:#0E1C36; --line:#1d3358; --ink:#F4F7FB; --mute:#9db0cc;
+  --blue:#2F7BFF; --blue-soft:#7fb0ff; --orange:#FF7A1A;
+  --paper:#F4F7FB; --paper-ink:#0b1730; --paper-mute:#566680; --paper-line:#cfd9e8;
+  --fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}
+h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+
+
+
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+.stage{position:relative;width:100%;background:#050b16;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.stage iframe,.stage canvas,.stage video{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.stage video{object-fit:cover;background:#000}
+.load{position:absolute;inset:0;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(120% 80% at 50% 0%,#12306a 0%,#07101F 70%);color:var(--ink);border:0;cursor:pointer;font:700 22px/1.15 var(--fd);padding:24px;text-align:center}
+.load i{font-style:normal;width:64px;height:64px;border-radius:50%;background:var(--blue);display:grid;place-items:center;font-size:24px;padding-left:4px}
+.load small{font:500 14px/1.3 var(--fb);color:var(--mute)}
+.links{display:flex;flex-wrap:wrap;gap:8px 18px;margin:12px 2px 0}
+.links a{color:var(--blue-soft);font-size:14px;font-weight:600;min-height:44px;display:inline-flex;align-items:center}
+.demo{font:600 11px/1 var(--fb);letter-spacing:.1em;color:var(--orange)}
+
+
+.ctl{margin-top:14px;display:flex;align-items:center;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:6px 16px}
+.ctl label{font:600 13px/1 var(--fb);letter-spacing:.1em;text-transform:uppercase;color:var(--mute);white-space:nowrap}
+.ctl input{flex:1;min-width:0;height:44px;accent-color:var(--blue)}
+.ctl b{font:700 16px/1 var(--fd);color:var(--blue-soft);min-width:2.8em;text-align:right;font-variant-numeric:tabular-nums}
+#gl{touch-action:pan-y;cursor:grab}
+.nogl{position:absolute;inset:0;display:none;align-items:center;justify-content:center;padding:24px;text-align:center;color:var(--mute)}
+
+/* sección del prompt */
+.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}
+.how .lead{margin-top:10px}
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}
+.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.steps span{color:var(--mute);font-size:14.5px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy:hover{filter:brightness(1.1)}
+.copy.ok{background:#1f9d62}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}
+.warn b{color:var(--orange)}
+.sig{color:var(--mute);font-size:13px;text-align:center}
+.sig b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){#menuBody,.langs button{transition:none}}
+
+@media print{}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · EFECTO</div>
+    <h1>Mueve el control. <em>La esfera se hace infinito.</em></h1>
+    <p class="lead">Es el objeto del carrusel «Este carrusel se sale»: un cromo que cruza todas las láminas como una sola escena. Juega con él y copia el prompt para hacer el tuyo.</p>
+  </header>
+
+  <section aria-label="Demo">
+    <div class="stage" style="aspect-ratio:4/5;max-width:520px;margin:0 auto">
+      <canvas id="gl" aria-label="Objeto cromado 3D que pasa de esfera a infinito"></canvas>
+      <div class="nogl" id="nogl">Tu navegador no puede mostrar el 3D. Los pasos y el prompt de abajo funcionan igual.</div>
+    </div>
+    <div class="ctl" style="max-width:520px;margin:14px auto 0"><label for="m">Esfera → ∞</label><input id="m" type="range" min="0" max="1" step="0.001" value="0"><b id="mv">0%</b></div>
+    <p class="hint" style="color:var(--mute);font-size:14px;margin:12px auto 0;max-width:520px">Mueve el control y arrastra hacia los lados para girar el objeto. En el carrusel, esta forma cruza todas las láminas como una sola escena.</p>
+  </section>
+
+  <section class="how" aria-label="Cómo hacer el tuyo">
+    <h2>Haz el tuyo en 3 pasos</h2>
+    <p class="lead">Hace falta un agente de código (Claude Code o similar) con Node.js 22 o superior, FFmpeg y Python 3.</p>
+    <ol class="steps">
+      <li><div class="dot">1</div><div class="t"><b>Copia el prompt</b><span>Es el de abajo. Cambia solo lo que va entre corchetes: tema, palabra y nº de láminas.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>Pégalo en Claude Code</b><span>Te enseña el guion y espera tu OK antes de construir. Tarda unos 20–40 minutos la primera vez.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>Revisa las láminas</b><span>Comprueba que el objeto enlaza de una lámina a la siguiente y que todo se lee en el móvil.</span></div></li>
+    </ol>
+
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt para tu carrusel con efecto</span><button class="copy" id="copy" type="button">Copiar prompt</button></div>
+      <pre id="prompt">Quiero un CARRUSEL ANIMADO MUDO de Instagram en el que UN objeto 3D cromado atraviesa todas las láminas como si fueran una sola
+escena continua. Tema/mensaje: [TEMA]. Palabra para comentar en la última lámina: [PALABRA]. Marca: fondo azul marino #07101F,
+azul eléctrico #2F7BFF, texto #F4F7FB, titulares Bricolage Grotesque 800 en mayúsculas, texto de apoyo Inter. Español de España.
+
+ENTREGA
+- [5] vídeos MP4 sueltos (uno por lámina), 1080×1350, 30 fps, SIN audio, 4,5–6,5 s cada uno, para subir a Instagram en orden.
+- Antes de construir enséñame el guion en una tabla (lámina · titular ≤ 8 palabras con 1–2 palabras clave en azul · línea de
+  apoyo ≤ 18 palabras · duración · qué hace el objeto) y ESPERA MI OK.
+- Cada lámina se entiende sola. Nada de relleno. La primera lámina debe verse completa y reconocible en el fotograma 0 (es la
+  miniatura). La última va en azul eléctrico con un botón «COMENTA [PALABRA]» y el logo.
+
+HERRAMIENTAS (versiones fijadas)
+- HyperFrames: `npx hyperframes@0.8.143` (lint, check, snapshot, render). Cada lámina es un proyecto HTML con UN solo timeline GSAP
+  en pausa y sin Math.random / Date.now / red.
+- Three.js 0.170.0 guardado EN LOCAL (build/three.module.min.js, descargado de npm), cargado con un importmap. Nada de CDN.
+- Para el 3D, un &lt;canvas&gt; de 1080×1350 dentro de cada lámina; el texto HTML va POR ENCIMA del canvas.
+
+LA TÉCNICA CLAVE: CONTINUIDAD ENTRE LÁMINAS
+1. Una sola cámara perspectiva «ancha» para todo el carrusel: ancho total = nº de láminas × 1080, alto 1350, FOV vertical 16° (lente
+   larga, apenas deforma en los bordes), distancia D = 675 / tan(8°), centrada en el origen. Cada lámina renderiza SU trozo con
+   camera.setViewOffset(totalAncho, 1350, (n-1)*1080, 0, 1080, 1350). Así el objeto que sale por la derecha de la lámina N entra
+   por la izquierda de la N+1 con la misma perspectiva, escala, luz y reflejos.
+2. Estado del objeto en coordenadas LOCALES de la lámina (px): x, y, z, rx, ry, rz, escala, m (0 esfera → 1 infinito), giro del
+   reflejo. Se anima con GSAP sobre un objeto JS plano W y en cada fotograma el 3D se dibuja LEYENDO W del timeline
+   (tl.time(t) dentro del evento «hf-seek»). Así el render es determinista y se puede renderizar en paralelo.
+3. Regla de costura: la ÚLTIMA pose de la lámina N es exactamente la PRIMERA de la N+1 (el objeto a caballo de la costura: x = 1080
+   al final de una, x = 0 al inicio de la siguiente, mismo y, z, rotación y m). Mantén el objeto QUIETO ~1,5 s al final de cada
+   lámina y ~0,3 s al principio: Instagram reproduce cada vídeo por separado y la persona desliza cuando quiere, no se puede
+   depender de una sincronización perfecta.
+4. Compensa la perspectiva: con la cámara ancha, un objeto fuera de z = 0 se corre hacia el centro. Coloca el objeto en
+   mundoX = (x_local_respecto_al_centro) · (D − z) / D (igual para Y) para que x, y de W sean píxeles reales de la lámina.
+5. NO uses tl.set(W, {...}, 0) para la pose inicial (a t = 0 no se aplica y el fotograma 0, que es la miniatura, sale mal): asigna
+   con Object.assign(W, {...}) al montar y anima con fromTo/to.
+
+LOOK «CROMO DE ESTUDIO» (lo que más se nota)
+- Material: MeshPhysicalMaterial { color 0xdbe8ff, metalness 1, roughness 0.04, envMapIntensity 1.4 }. Tone mapping Neutral.
+- El cromo solo refleja el ENTORNO: constrúyelo con PMREMGenerator.fromScene(escena) de una cúpula con degradado (cénit azul claro
+  HDR ×3, horizonte casi negro, suelo azul) + cajas de luz planas con color MAYOR que 1 (HDR): tira blanca superior, columna azul
+  eléctrica a la izquierda, columna blanca fría a la derecha, tiras finas de borde. Gira el entorno (scene.environmentRotation.y)
+  mientras se mueve el objeto para que el reflejo «viva».
+- Marco gráfico 3D (panel azul marino muy oscuro con borde azul de 5 px, esquinas redondeadas) unos 140 px DETRÁS del objeto: el
+  objeto lo atraviesa, proyecta sombra sobre él (DirectionalLight con sombras, intensidad ~0,7) y a veces sale por sus bordes. En
+  la lámina de perspectiva inclina el marco (rotación Y ≈ −0,42 rad).
+- Fondo: degradado vertical #060e1c → #0a1630 → #0c2150 + rejilla fina de 60 px (1080 es múltiplo de 60: la rejilla no tiene costura).
+  La última lámina arranca marina (igual que el borde de la anterior) y el azul eléctrico se expande desde el objeto con un
+  clip-path circle().
+
+LA TRANSFORMACIÓN ESFERA → INFINITO 3D (el momento «¿cómo han hecho esto?»)
+- Superficie = unión de esferas de radio r(m) a lo largo de una lemniscata de Gerono cerrada:
+  C(t) = ( A·g·cos t , B·g·sin 2t , K·g·sin t ), t ∈ [0, 2π), con A=400, B=190, K=75, g = m,
+  r(m) = 250 + (55 − 250)·m. La z alterna (±K) en los dos cruces para que el tubo no se corte a sí mismo.
+  Con m ≈ 0 la curva es un punto y sale una ESFERA de radio 250; al crecer se alarga en «cacahuete» y se abren los dos huecos
+  del infinito. El cambio de topología sale solo, sin trucos.
+- Mallado: marching cubes sobre el campo de distancia a la curva (polilínea de 288 tramos en la transformación y 480 en la pose
+  final; con pocos tramos el cromo muestra escalones). Celda fina de 6 px (3,5 px en la pose final) y rejilla gruesa de 4×4×4 celdas
+  para evaluar solo cerca de la superficie. Usa las tablas edgeTable y triTable de three/examples/jsm/objects/MarchingCubes.js.
+  Mantén la rejilla alineada entre fotogramas para que la malla no «baile».
+- Normales ANALÍTICAS: la dirección desde el punto más cercano de la curva al vértice (no recalcules normales por triángulo).
+  Orienta cada triángulo hacia fuera comparando su normal con esa dirección.
+- Cuando m = 1 cachea la malla (no la reconstruyas en cada fotograma). Cuando m &lt; 0.0005 usa una esfera normal.
+- Coreografía de la transformación: la esfera llega al centro, m va de 0 a 1 con ease power2.inOut en ~2,5 s mientras el objeto
+  da UNA vuelta completa sobre el eje Y, se acerca a la cámara (z ≈ +420 y vuelve) y sale hacia la costura ya como infinito.
+  Fuera de la transformación evita giros de 360° del infinito (se queda de canto y parece una «V»): usa balanceos de ±0,8 rad.
+
+ESTRUCTURA DE LAS LÁMINAS (cámbialo por tu tema)
+1 portada: titular enorme visible desde el fotograma 0, esfera ya rompiendo el borde del marco, «desliza →».
+2 la esfera cruza el marco entera, con un arco hacia la cámara.
+3 transformación esfera → infinito 3D y sale por la derecha a caballo de la costura.
+4 la cinta pasa por delante del marco inclinado en perspectiva con un balanceo que enseña el volumen.
+5 azul eléctrico: el objeto terminado flotando, titular, botón «COMENTA [PALABRA]» con cursor que hace clic y logo.
+
+REVISIÓN OBLIGATORIA ANTES DE ENTREGAR
+- npx hyperframes check en cada lámina, renderiza TODAS y comprueba con ffprobe: 1080×1350, 30 fps, sin pista de audio.
+- Mira fotogramas sueltos (inicio, mitad, final) de cada lámina: nada ilegible, nada fuera de márgenes, cromo sin escalones.
+- Compón en una imagen la mitad derecha del último fotograma de la lámina N junto a la mitad izquierda del primero de la N+1 y
+  comprueba que el objeto encaja sin salto en CADA costura.
+- Mira la miniatura (fotograma 0 de la portada) reducida a ~300 px: tiene que entenderse.
+- Genera una vista previa del carrusel entero simulando el deslizamiento entre láminas (xfade slideleft de FFmpeg).
+- Si alguna lámina parece una presentación de PowerPoint con animaciones, rediséñala.</pre>
+    </div>
+
+    <p class="warn"><b>Revísalo antes de usarlo.</b> Este efecto es lento de renderizar y exigente: no te saldrá a la primera. Revisa cada lámina antes de subirla.</p>
+  </section>
+
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+<script>
+
+(function(){
+  var cv=document.getElementById('gl'), gl=cv.getContext('webgl',{antialias:false,alpha:false});
+  if(!gl){document.getElementById('nogl').style.display='flex';return}
+  var N=64;
+  var VS='attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+  var FS=[
+  'precision highp float;',
+  'uniform vec2 R;uniform float rad,az,el,D;uniform vec3 P['+(N+1)+'];',
+  'float seg(vec3 p,vec3 a,vec3 b){vec3 pa=p-a,ba=b-a;float h=clamp(dot(pa,ba)/(dot(ba,ba)+1e-7),0.,1.);return length(pa-ba*h);}',
+  'float map(vec3 p){float d=1e9;for(int i=0;i<'+N+';i++){d=min(d,seg(p,P[i],P[i+1]));}return d-rad;}',
+  'float lite(vec3 d,vec3 c,float wx,float wy){c=normalize(c);float k=dot(d,c);if(k<=.05)return 0.;vec3 x=normalize(cross(vec3(0.,1.,0.),c));vec3 y=cross(c,x);float u=abs(dot(d,x)/k),v=abs(dot(d,y)/k);return smoothstep(wx,wx*.7,u)*smoothstep(wy,wy*.7,v);}',
+  'vec3 env(vec3 d){float t=d.y;',
+  ' vec3 sky=mix(vec3(.10,.27,.62),vec3(.61,.75,1.)*1.7,pow(clamp((t-.04)/.96,0.,1.),.8));',
+  ' vec3 hor=vec3(.004,.016,.036);',
+  ' vec3 gnd=mix(vec3(.01,.04,.12),vec3(.17,.43,.93),pow(clamp((-t-.04)/.96,0.,1.),.9));',
+  ' vec3 c=mix(gnd,hor,smoothstep(-.12,-.02,t));c=mix(c,sky,smoothstep(.02,.12,t));',
+  ' c+=vec3(1.)*7.*lite(d,vec3(0.,1.2,.3),.95,.28);',
+  ' c+=vec3(.18,.48,1.)*6.*lite(d,vec3(-1.,.1,.25),.16,.8);',
+  ' c+=vec3(.9,.94,1.)*5.*lite(d,vec3(1.,.15,-.1),.14,.7);',
+  ' c+=vec3(.5,.69,1.)*3.*lite(d,vec3(0.,-.25,1.),.8,.1);',
+  ' c+=vec3(1.)*6.*lite(d,vec3(-.35,.3,1.),.3,.07);',
+  ' c+=vec3(1.)*7.*lite(d,vec3(-.55,.1,1.),.05,.5);',
+  ' c+=vec3(.8,.88,1.)*6.*lite(d,vec3(.55,-.05,1.),.05,.5);',
+  ' c+=vec3(.18,.48,1.)*3.*lite(d,vec3(0.,.2,-1.),.7,.45);',
+  ' return c;}',
+  'void main(){',
+  ' vec2 uv=(gl_FragCoord.xy-.5*R)/R.y;',
+  ' vec3 bg=mix(vec3(.02,.05,.1),vec3(.04,.12,.28),smoothstep(1.1,0.,length(uv*vec2(1.,.9)-vec2(0.,.12))));',
+  ' vec3 ro=D*vec3(cos(el)*sin(az),sin(el),cos(el)*cos(az));',
+  ' vec3 f=normalize(-ro),r=normalize(cross(f,vec3(0.,1.,0.))),u=cross(r,f);',
+  ' float tn=tan(radians(8.));vec3 rd=normalize(f+(uv.x*r+uv.y*u)*2.*tn);',
+  ' vec3 col=bg;',
+  ' float b=dot(ro,rd),cc=dot(ro,ro)-1.55*1.55,h=b*b-cc;',
+  ' if(h>0.){float t=-b-sqrt(h);bool hit=false;',
+  '  for(int i=0;i<90;i++){vec3 p=ro+rd*t;float d=map(p);if(d<.0015){hit=true;break;}t+=d;if(t>D+2.)break;}',
+  '  if(hit){vec3 p=ro+rd*t;vec2 e=vec2(.012,-.012);',
+  '   vec3 n=normalize(e.xyy*map(p+e.xyy)+e.yyx*map(p+e.yyx)+e.yxy*map(p+e.yxy)+e.xxx*map(p+e.xxx));',
+  '   vec3 rf=reflect(rd,n);float fr=pow(1.-max(dot(-rd,n),0.),3.);',
+  '   vec3 c=env(rf)*(.82+.18*fr);c=c/(1.+c*.35);col=pow(c,vec3(.9));}',
+  ' }',
+  ' gl_FragColor=vec4(pow(col,vec3(.95)),1.);',
+  '}'].join('\n');
+  function sh(t,s){var o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS)){throw new Error(gl.getShaderInfoLog(o))}return o}
+  var pr;
+  try{pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,VS));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pr);
+    if(!gl.getProgramParameter(pr,gl.LINK_STATUS))throw new Error('link')}catch(e){document.getElementById('nogl').style.display='flex';return}
+  gl.useProgram(pr);
+  var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  var loc=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+  var U={};['R','rad','az','el','D','P'].forEach(function(n){U[n]=gl.getUniformLocation(pr,n)});
+  // misma curva y proporciones que el carrusel (px / 400): lemniscata de Gerono con z alterna; radio de 0,625 (esfera) a 0,1375 (tubo)
+  var A=1,B=.475,K=.1875,R0=.625,R1=.1375;
+  var m=0,az=.5,el=.22,dirty=true,pts=new Float32Array((N+1)*3);
+  function ease(x){return x*x*(3-2*x)}
+  function curve(){var g=ease(m);for(var i=0;i<=N;i++){var t=(i%N)/N*Math.PI*2;pts[3*i]=A*g*Math.cos(t);pts[3*i+1]=B*g*Math.sin(2*t);pts[3*i+2]=K*g*Math.sin(t)}return R0+(R1-R0)*g}
+  var rad=curve();
+  function size(){var d=Math.min(window.devicePixelRatio||1,1.5),w=cv.clientWidth,h=cv.clientHeight,s=Math.min(1,560/Math.max(w,1));
+    var cw=Math.max(2,Math.round(w*d*s)),ch=Math.max(2,Math.round(h*d*s));if(cv.width!==cw||cv.height!==ch){cv.width=cw;cv.height=ch;dirty=true}}
+  function draw(){size();gl.viewport(0,0,cv.width,cv.height);
+    var asp=cv.width/cv.height,D=Math.max(9,1.3/(Math.tan(8*Math.PI/180)*asp));
+    gl.uniform2f(U.R,cv.width,cv.height);gl.uniform1f(U.rad,rad);gl.uniform1f(U.az,az);gl.uniform1f(U.el,el);gl.uniform1f(U.D,D);gl.uniform3fv(U.P,pts);
+    gl.drawArrays(gl.TRIANGLES,0,3);dirty=false}
+  var slider=document.getElementById('m'),mv=document.getElementById('mv');
+  function setM(v){m=v;rad=curve();mv.textContent=Math.round(v*100)+'%';dirty=true;slider.value=v}
+  slider.addEventListener('input',function(){intro=false;setM(parseFloat(slider.value))});
+  var drag=null;
+  cv.addEventListener('pointerdown',function(e){drag=[e.clientX,e.clientY];cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing'});
+  cv.addEventListener('pointerup',function(){drag=null;cv.style.cursor='grab'});
+  cv.addEventListener('pointercancel',function(){drag=null});
+  cv.addEventListener('pointermove',function(e){if(!drag)return;az-=(e.clientX-drag[0])*.008;el=Math.max(-.5,Math.min(1.1,el+(e.clientY-drag[1])*.006));drag=[e.clientX,e.clientY];dirty=true});
+  window.addEventListener('resize',function(){dirty=true});
+  // al aparecer en pantalla, la esfera se transforma una vez en el infinito
+  var intro=true,t0=null,reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function loop(ts){
+    if(intro&&t0!==null){var x=Math.min(1,(ts-t0)/2600);setM(1-Math.pow(1-x,3)*1);if(x>=1)intro=false}
+    if(dirty)draw();requestAnimationFrame(loop)}
+  function start(){if(t0===null){t0=performance.now()}}
+  draw();
+  if(reduce){intro=false}
+  if('IntersectionObserver' in window&&!reduce){new IntersectionObserver(function(es,o){if(es[0].isIntersecting){setTimeout(start,350);o.disconnect()}},{threshold:.6}).observe(cv)}else{start()}
+  requestAnimationFrame(loop);
+})();
+
+
+(function(){
+  var btn=document.getElementById('copy'), pre=document.getElementById('prompt');
+  function done(){btn.textContent='Copiado';btn.classList.add('ok');setTimeout(function(){btn.textContent='Copiar prompt';btn.classList.remove('ok')},2200)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selecciona y copia';setTimeout(function(){btn.textContent='Copiar prompt'},2600)}
+  btn.addEventListener('click',function(){
+    var txt=pre.innerText;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}
+  });
+})();
+
+</script>
+</body>
+</html>

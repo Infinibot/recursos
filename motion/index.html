@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Vídeo de ejemplo de piezas de motion graphics hechas con IA a partir de una frase, con el prompt para hacerlas.">
+<meta property="og:title" content="Una frase, cuatro piezas de motion">
+<meta property="og:description" content="Vídeo de ejemplo de piezas de motion graphics hechas con IA a partir de una frase, con el prompt para hacerlas.">
+<title>Una frase, cuatro piezas de motion</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+
+/* Layout: página oscura de marca (marino + azul eléctrico) con una carta clara de papel en el centro, como la de una mesa. */
+:root{
+  color-scheme:dark;
+  --bg:#07101F; --panel:#0E1C36; --line:#1d3358; --ink:#F4F7FB; --mute:#9db0cc;
+  --blue:#2F7BFF; --blue-soft:#7fb0ff; --orange:#FF7A1A;
+  --paper:#F4F7FB; --paper-ink:#0b1730; --paper-mute:#566680; --paper-line:#cfd9e8;
+  --fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}
+h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+
+
+
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+.stage{position:relative;width:100%;background:#050b16;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.stage iframe,.stage canvas,.stage video{position:absolute;inset:0;width:100%;height:100%;border:0;display:block}
+.stage video{object-fit:cover;background:#000}
+.load{position:absolute;inset:0;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:radial-gradient(120% 80% at 50% 0%,#12306a 0%,#07101F 70%);color:var(--ink);border:0;cursor:pointer;font:700 22px/1.15 var(--fd);padding:24px;text-align:center}
+.load i{font-style:normal;width:64px;height:64px;border-radius:50%;background:var(--blue);display:grid;place-items:center;font-size:24px;padding-left:4px}
+.load small{font:500 14px/1.3 var(--fb);color:var(--mute)}
+.links{display:flex;flex-wrap:wrap;gap:8px 18px;margin:12px 2px 0}
+.links a{color:var(--blue-soft);font-size:14px;font-weight:600;min-height:44px;display:inline-flex;align-items:center}
+.demo{font:600 11px/1 var(--fb);letter-spacing:.1em;color:var(--orange)}
+
+
+/* sección del prompt */
+.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}
+.how .lead{margin-top:10px}
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}
+.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.steps span{color:var(--mute);font-size:14.5px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy:hover{filter:brightness(1.1)}
+.copy.ok{background:#1f9d62}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}
+.warn b{color:var(--orange)}
+.sig{color:var(--mute);font-size:13px;text-align:center}
+.sig b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){#menuBody,.langs button{transition:none}}
+
+@media print{}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · MOTION</div>
+    <h1>Una frase. <em>Cuatro piezas de motion.</em></h1>
+    <p class="lead">Estas piezas salieron de una única frase de partida y un prompt. Dale al play y, debajo, copia el prompt para hacer las tuyas con tu marca.</p>
+  </header>
+
+  <section aria-label="Demo">
+    <div class="stage" style="aspect-ratio:4/5;max-width:440px;margin:0 auto">
+      <video controls playsinline preload="metadata" poster="poster.jpg" src="preview.mp4"></video>
+    </div>
+    <p class="hint" style="color:var(--mute);font-size:14px;margin:12px 2px 0"><span class="demo">DEMO · DATOS FICTICIOS</span> · Así se ve el carrusel deslizando, láminas de 1080×1350 en MP4.</p>
+  </section>
+
+  <section class="how" aria-label="Cómo hacer el tuyo">
+    <h2>Haz las tuyas en 3 pasos</h2>
+    <p class="lead">Hace falta un agente de código (Claude Code o similar) con Node.js 22 o superior, FFmpeg y Python 3.</p>
+    <ol class="steps">
+      <li><div class="dot">1</div><div class="t"><b>Copia el prompt</b><span>Es el de abajo. Cambia la frase de partida, el nombre de tu marca y tu color.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>Pégalo en tu agente de código</b><span>Te devuelve cuatro vídeos MP4 de estética distinta. Es normal necesitar varias rondas.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>Pide ajustes y súbelos</b><span>Revisa que se lea bien en el móvil antes de publicar.</span></div></li>
+    </ol>
+
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt para tu motion</span><button class="copy" id="copy" type="button">Copiar prompt</button></div>
+      <pre id="prompt">Actúa como director de arte y motion designer. Trabajas en un agente de código (Claude Code o similar) con Node.js 22 o superior, FFmpeg y Python 3 instalados, y con acceso a internet para descargar paquetes.
+
+FRASE DE PARTIDA (cámbiala por la tuya)
+«Lanzamiento de ORVANE, un anillo inteligente de edición limitada: premium, cinematográfico y con el azul eléctrico de InfiniBot.»
+Sustituye: ORVANE por tu producto o marca (inventado si es una demo) y «azul eléctrico de InfiniBot» por tu color de marca.
+
+OBJETIVO
+Con esa frase como única idea, produce CUATRO piezas de motion graphics de estéticas claramente distintas entre sí. Cada una: vídeo MP4 de 1080×1350 (4:5), 30 fps, sin audio, de 5 a 5,6 s, legible en un móvil. Marcas, nombres, precios y cifras inventados y rotulados «DEMO · DATOS FICTICIOS» cuando aparezcan.
+
+HERRAMIENTAS (versiones fijadas para que el resultado sea reproducible)
+- HyperFrames: `npx hyperframes@0.8.143` (check, snapshot, render). Cada pieza es una composición HTML de 1080×1350 con UN solo timeline GSAP 3 en pausa, guardada en `window.__timelines`. Nada de Math.random(), Date.now() ni red durante el render. La pose inicial de los objetos se asigna al montar (no con tl.set en el segundo 0).
+- GSAP 3 en local (archivo, sin CDN).
+- Three.js 0.170.0 en local (build/three.module.min.js descargado con `npm pack three@0.170.0`), cargado con un importmap, solo para las piezas con objeto 3D. El 3D se dibuja SIEMPRE a partir del timeline en el instante que pide HyperFrames: escucha el evento «hf-seek», fija el timeline con tl.time(t) y renderiza. Renderer 1080×1350, pixelRatio 1, canvas con alfa, tone mapping Neutral.
+- Tipografías: Bricolage Grotesque (titulares, peso 800, eje de anchura 75–100 %) e Inter. Paleta: marino #07101F, azul eléctrico #2F7BFF, blanco #F4F7FB, naranja #FF7A1A solo en detalles pequeños.
+
+LAS CUATRO PIEZAS
+
+PIEZA 1 · ANUNCIO DE LANZAMIENTO (oscura, tipografía cinética brutal)
+- Fondo degradado radial marino. Cabecera pequeña con el nombre del producto. Titular en dos líneas, mayúsculas, Bricolage 800 condensado (font-stretch 78 %): «LLEGA EL» (236 px, blanco) y «ANILLO» (340 px, azul), centrado.
+- Cada línea entra con un golpe: escala 2,2 → 1, desenfoque 16 px → 0, power4.out, 0,3 s; la pieza entera tiembla 5–7 veces (±10 px, 0,045 s) tras cada impacto; destello blanco azulado de 0,05 s en el segundo impacto.
+- Objeto 3D: anillo cromado (TorusGeometry radio 1, tubo 0,3, escala z 0,72, escala 250 px) que aparece de golpe delante de la palabra «ANILLO» (el texto queda detrás del canvas), gira (ry −1,3 → 0,5, rx −0,95) y flota. Un arco azul emisivo (TorusGeometry radio 1,3, tubo 0,05, arco 1,1 rad) recorre el borde.
+- Al final: «EDICIÓN LIMITADA / DESDE 249 €» abajo a la izquierda y el rótulo «DEMO · DATOS FICTICIOS» abajo a la derecha.
+
+PIEZA 2 · TÍTULO CINEMATOGRÁFICO (sin ciencia ficción, sin partículas)
+- Fondo casi negro con viñeta azul, dos manchas de niebla desenfocadas (blur 90 px, opacidad 0,34) que derivan lentamente, bandas negras de formato cine arriba y abajo (150 px).
+- Título «LA ÚLTIMA / SEÑAL» en Bricolage 800 condensado (font-stretch 76 %, 262 y 342 px), con profundidad REAL en CSS 3D: 18 copias del texto apiladas con translateZ(−6 px × i), de oscuras a azul en el borde iluminado. La cámara se acerca: scale 1,12 → 1 y rotationY −16° → −5°, rotationX 6° → 2°.
+- Una línea de luz azul (5 px con resplandor) cruza el título de arriba abajo mientras un barrido de brillo (gradiente con background-clip:text) recorre las letras.
+- Subtítulo «UNA PIEZA DE MOTION · INFINIBOT» con el espaciado entre letras cerrándose, y «PRÓXIMAMENTE». Al final todo queda quieto.
+- IMPORTANTE (errores reales): aplica la rotación y la escala al contenedor con transform-style:preserve-3d, no al que lleva perspective; y no pongas opacity ni filter en ese contenedor (aplanan el 3D): el desenfoque de entrada va en el contenedor exterior. Deja 46 px de padding-top a cada línea o se recortan las tildes con background-clip:text.
+
+PIEZA 3 · PORTADA EDITORIAL CLARA (tipo revista)
+- Fondo claro (degradado casi blanco #EEF3FA). Cabecera «MATERIA» enorme en negro (262 px, condensado), línea superior «Nº 07 · OTOÑO» y «PORTADA DEMO · DATOS FICTICIOS». Marco fino negro que se dibuja solo (stroke-dashoffset) alrededor.
+- Objeto 3D: gota de metal líquido delante de la cabecera. IcosahedronGeometry(1, 44) con los vértices soldados (para que las normales no tengan costuras), material cromado tintado de azul (metalness 1, roughness 0,06) y un entorno claro. Deformación suave por ondas senoidales de la dirección del vértice (amplitud 0,14 → 0,24, fase proporcional al tiempo) y normales recalculadas en cada fotograma. Sombra falsa debajo (elipse con radial-gradient y blur).
+- Titular por bloques que suben desde una máscara: «LA FORMA / DEL FUTURO» (104 px, «FUTURO» en azul), tres sumarios pequeños con filetes, y un sello naranja «EDICIÓN ESPECIAL» que entra con rebote.
+
+PIEZA 4 · INTERFAZ VISUAL (panel de datos que no parece una maqueta)
+- Fondo azul marino. Panel «Panel de ventas · ORVANE» con el rótulo «DEMO · DATOS FICTICIOS». Tarjetas de 30 px de radio, borde de 1,5 px translúcido.
+- Tarjeta grande «VENTAS DE HOY»: el valor cuenta de 0 a 12.480 € y su porcentaje de variación con él; sobre una línea de gráfico que se dibuja. A los 3 s el valor cambia a 14.920 € (+43,0 % respecto a un ayer de 10.434 €) y el porcentaje se actualiza con coherencia.
+- Anillo de objetivo que se llena hasta el 82 %, siete barras que crecen, y tres módulos pequeños (pedidos, conversión, ticket medio) de los que se iluminan dos con borde azul y resplandor y cambian de cifra.
+- Los contadores se animan con pasos de tl.set de textContent en el timeline (no con onUpdate), para que sean deterministas al hacer seek.
+
+LOOK «CROMO» EN THREE.JS (lo que más cuesta acertar)
+- El cromo solo refleja el ENTORNO. Constrúyelo con PMREMGenerator.fromScene() de una escena propia: una cúpula con degradado en los colores vértice (cénit azul claro con valores HDR, horizonte casi negro, suelo azul) más cajas de luz planas (PlaneGeometry con MeshBasicMaterial y color con valores mayores que 1 y toneMapped:false): tira blanca superior, columna azul eléctrica a la izquierda, columna blanca fría a la derecha y franjas finas de anchos distintos. Si la cara del objeto parece un azul plano, está reflejando una zona vacía del entorno: orienta el objeto para que refleje el cielo (inclina el anillo hacia atrás) y añade franjas en esa zona.
+- Material: MeshPhysicalMaterial, color casi blanco azulado, metalness 1, roughness 0,04–0,06, envMapIntensity 1,25–1,5. Anima scene.environmentRotation.y para que el reflejo «viva».
+
+REVISIÓN OBLIGATORIA ANTES DE ENTREGAR
+1. Renderiza las cuatro piezas (`npx hyperframes render`, workers 2 como máximo) y comprueba con ffprobe: 1080×1350, 30 fps, sin pista de audio.
+2. Extrae con `npx hyperframes snapshot --at ...` fotogramas del inicio, el desarrollo y el final de CADA pieza y MÍRALOS: textos cortados, legibilidad, cromo sin escalones ni zonas planas, tildes recortadas.
+3. Si una pieza parece una presentación de PowerPoint con animaciones, rediséñala. Itera hasta que cada una resulte memorable por sí sola; es normal necesitar varias rondas.
+4. Entrega los MP4 y un resumen breve de qué ajustaste y qué queda por pulir.
+
+PERSONALIZA ANTES DE LANZAR: la frase de partida, el nombre del producto o marca, el color de marca, el precio y las cifras demo, y los textos de las cuatro piezas.</pre>
+    </div>
+
+    <p class="warn"><b>Revísalo antes de usarlo.</b> Cifras, nombres y precios del ejemplo son inventados. Pon los tuyos y comprueba cada texto en pantalla antes de publicar.</p>
+  </section>
+
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+<script>
+
+
+(function(){
+  var btn=document.getElementById('copy'), pre=document.getElementById('prompt');
+  function done(){btn.textContent='Copiado';btn.classList.add('ok');setTimeout(function(){btn.textContent='Copiar prompt';btn.classList.remove('ok')},2200)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selecciona y copia';setTimeout(function(){btn.textContent='Copiar prompt'},2600)}
+  btn.addEventListener('click',function(){
+    var txt=pre.innerText;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}
+  });
+})();
+
+</script>
+</body>
+</html>
