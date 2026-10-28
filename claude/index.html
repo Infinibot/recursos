@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Personaliza la portada de tu carrusel y copia el prompt para que Claude Code te haga el carrusel animado entero.">
+<meta property="og:title" content="Claude te hace el carrusel">
+<meta property="og:description" content="Personaliza tu portada y copia el prompt para que Claude Code monte el carrusel animado entero.">
+<title>Claude te hace el carrusel</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: página oscura de marca (marino + azul eléctrico). La demo es una portada 4:5 que se anima al cambiar los datos. */
+:root{
+  color-scheme:dark;
+  --bg:#07101F; --panel:#0E1C36; --line:#1d3358; --ink:#F4F7FB; --mute:#9db0cc;
+  --blue:#2F7BFF; --blue-soft:#7fb0ff; --orange:#FF7A1A;
+  --fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  /* tokens de la portada (los pone el JS) */
+  --b:#2F7BFF; --bgc:#0a1224; --on-b:#fff; --hl:#2F7BFF;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}
+h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+
+/* formulario del personalizador */
+.form{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
+.f{display:flex;flex-direction:column;gap:6px;min-width:0}
+.f.full{grid-column:1/-1}
+.f label,.f .lb{font:600 12px/1 var(--fb);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.f input[type=text]{font:500 16px/1.2 var(--fb);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-height:46px;width:100%;min-width:0}
+.f input[type=text]:focus{border-color:var(--blue);outline:none;box-shadow:0 0 0 3px rgba(47,123,255,.25)}
+.sw{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sw button{width:40px;height:40px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;box-shadow:inset 0 0 0 2px rgba(255,255,255,.18)}
+.sw button[aria-pressed="true"]{border-color:var(--ink)}
+.sw input[type=color]{width:46px;height:40px;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:2px;cursor:pointer}
+
+/* la portada 4:5 */
+.stagebox{display:flex;flex-direction:column;align-items:center;gap:14px}
+.cover{container-type:inline-size;position:relative;width:100%;max-width:360px;aspect-ratio:4/5;border-radius:14px;overflow:hidden;background:var(--bgc);
+  box-shadow:0 24px 60px rgba(0,0,0,.5),0 0 0 1px var(--line);isolation:isolate}
+.cover::before{content:"";position:absolute;inset:0;z-index:-1;background:radial-gradient(90cqw 70cqw at 85% 105%,color-mix(in srgb,var(--b) 38%,transparent),transparent 70%)}
+.cv-top{position:absolute;left:7cqw;right:7cqw;top:6cqw;display:flex;justify-content:space-between;align-items:center;font:600 3.4cqw/1 var(--fb);color:rgba(244,247,251,.72);gap:3cqw}
+.cv-top .u{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.cv-top .n{white-space:nowrap}
+.cv-body{position:absolute;left:7cqw;right:7cqw;top:17cqw;bottom:22cqw;display:flex;flex-direction:column;justify-content:center;gap:4.5cqw}
+.kick{align-self:flex-start;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:700 3.5cqw/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--hl);
+  border:1.5px solid color-mix(in srgb,var(--hl) 60%,transparent);border-radius:99px;padding:2.2cqw 3.6cqw}
+.hl{margin:0;font:800 10.4cqw/.98 var(--fd);letter-spacing:-.02em;color:#F4F7FB;text-transform:uppercase}
+.hl .ln{display:block}
+.hl .w{display:inline-block;margin-right:.22em;will-change:transform,filter}
+.hl .kw{color:var(--hl);position:relative}
+.hl .kw::after{content:"";position:absolute;left:0;right:.1em;bottom:-.04em;height:.07em;background:var(--hl);transform-origin:left;transform:scaleX(0)}
+.sub{margin:0;font:500 4.2cqw/1.3 var(--fb);color:rgba(244,247,251,.78)}
+.cv-bot{position:absolute;left:7cqw;right:7cqw;bottom:6cqw;display:flex;justify-content:space-between;align-items:center;gap:3cqw}
+.pill{max-width:62%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:var(--b);color:var(--on-b);font:800 4cqw/1 var(--fd);letter-spacing:.04em;text-transform:uppercase;border-radius:99px;padding:3cqw 5cqw}
+.swipe{font:700 3.6cqw/1 var(--fb);letter-spacing:.06em;text-transform:uppercase;color:rgba(244,247,251,.78);white-space:nowrap}
+
+/* animación: cada elemento entra distinto según su papel */
+.cover:not(.play) .kick,.cover:not(.play) .w,.cover:not(.play) .sub,.cover:not(.play) .pill,.cover:not(.play) .swipe{opacity:0}
+.cover.play .kick{animation:rise .7s .05s cubic-bezier(.16,1,.3,1) both}
+.cover.play .l1 .w{animation:hit .38s calc(.35s + var(--i)*.14s) cubic-bezier(.05,.85,.2,1) both}
+.cover.play .l2 .w{animation:wordin .5s calc(1.0s + var(--i)*.11s) cubic-bezier(.16,1,.3,1) both}
+.cover.play .kw::after{animation:draw .5s 1.75s cubic-bezier(.65,0,.35,1) both}
+.cover.play .sub{animation:rise .7s 1.9s cubic-bezier(.16,1,.3,1) both}
+.cover.play .pill{animation:pop .5s 2.2s cubic-bezier(.34,1.4,.64,1) both}
+.cover.play .swipe{animation:wordin .5s 2.35s cubic-bezier(.16,1,.3,1) both}
+@keyframes rise{from{opacity:0;transform:translateY(60%);filter:blur(6px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes hit{from{opacity:0;transform:scale(2.2);filter:blur(16px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes wordin{from{opacity:0;transform:translateY(.25em);filter:blur(6px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes draw{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+@keyframes pop{from{opacity:0;transform:translateY(40%) scale(.8)}to{opacity:1;transform:none}}
+.again{font:600 14px/1 var(--fb);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:12px 18px;min-height:44px;cursor:pointer}
+.again:hover{border-color:var(--blue)}
+.hint{color:var(--mute);font-size:14px;margin:0;text-align:center;max-width:44ch}
+
+/* sección del prompt */
+.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}
+.how .lead{margin-top:10px}
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}
+.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.steps span{color:var(--mute);font-size:14.5px}
+.steps code{font:500 12.5px/1.4 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;background:#0a1630;border-radius:6px;padding:2px 6px;overflow-wrap:anywhere}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer;white-space:nowrap}
+.copy:hover{filter:brightness(1.1)}
+.copy.ok{background:#1f9d62}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:420px;overflow:auto}
+.note{margin:12px 2px 0;color:var(--mute);font-size:14px}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}
+.warn b{color:var(--orange)}
+.warn p{margin:0 0 8px}
+.warn p:last-child{margin:0}
+.sig{color:var(--mute);font-size:13px;text-align:center}
+.sig b{color:var(--ink)}
+@media (max-width:460px){.form{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){
+  .cover .kick,.cover .w,.cover .sub,.cover .pill,.cover .swipe{animation:none!important;opacity:1!important}
+  .cover .kw::after{animation:none!important;transform:scaleX(1)}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · CLAUDE</div>
+    <h1>Claude te hace el carrusel. <em>Tú no tocas nada.</em></h1>
+    <p class="lead">Escribe tu tema y mira tu portada animarse. Debajo, el prompt ya relleno para que Claude Code te monte las 7 láminas en vídeo.</p>
+  </header>
+
+  <section aria-label="Personalizador de portada">
+    <div class="form">
+      <div class="f full"><label for="tema">Tema de tu carrusel</label><input id="tema" type="text" maxlength="40" value="Reseñas de Google" autocomplete="off"></div>
+      <div class="f"><label for="palabra">Palabra para comentar</label><input id="palabra" type="text" maxlength="14" value="RESEÑAS" autocomplete="off" autocapitalize="characters"></div>
+      <div class="f"><label for="usuario">Tu usuario de Instagram</label><input id="usuario" type="text" maxlength="30" value="@tunegocio" autocomplete="off" autocapitalize="none"></div>
+      <div class="f full"><span class="lb" id="lbcolor">Color de tu marca</span>
+        <div class="sw" id="sw" role="group" aria-labelledby="lbcolor"></div></div>
+    </div>
+
+    <div class="stagebox">
+      <div class="cover play" id="cover" role="img" aria-label="Portada de ejemplo del carrusel, animada">
+        <div class="cv-top"><span class="u" id="cUser"></span><span class="n">1/7</span></div>
+        <div class="cv-body">
+          <div class="kick" id="cTema"></div>
+          <h3 class="hl" id="hl"></h3>
+          <p class="sub">Te enseño cómo, paso a paso.</p>
+        </div>
+        <div class="cv-bot"><span class="pill" id="cPill"></span><span class="swipe">Desliza →</span></div>
+      </div>
+      <button class="again" id="again" type="button">Ver la animación otra vez</button>
+      <p class="hint">Es la portada de ejemplo. Claude te hará esta y las 6 láminas siguientes, cada una en un vídeo MP4.</p>
+    </div>
+  </section>
+
+  <section class="how" aria-label="Cómo hacerlo">
+    <h2>Hazlo tú en 4 pasos</h2>
+    <p class="lead">No hace falta saber programar, pero sí instalar un par de cosas una sola vez.</p>
+    <ol class="steps">
+      <li><div class="dot">1</div><div class="t"><b>Instala lo necesario</b><span>Claude Code, Node.js 22 o superior, FFmpeg y Python 3.<br>Mac: <code>brew install node ffmpeg python</code><br>Windows: <code>winget install OpenJS.NodeJS.LTS</code> y <code>winget install Gyan.FFmpeg</code> (reinicia la terminal).</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>Abre Claude Code en una carpeta vacía</b><span>Crea una carpeta nueva, entra en ella desde la terminal y escribe <code>claude</code>. Pega el prompt de abajo.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>Aprueba el guion</b><span>Claude te enseña una tabla con las 7 láminas y espera. Cambia lo que no te guste y di «OK» cuando esté bien.</span></div></li>
+      <li><div class="dot">4</div><div class="t"><b>Revisa las láminas</b><span>Te enseña fotogramas de cada una. Pide correcciones concretas («la lámina 4 se lee muy rápido») y al final te deja <code>lamina_1.mp4</code> … <code>lamina_7.mp4</code>.</span></div></li>
+    </ol>
+
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt con tus datos</span><button class="copy" id="copy" type="button">Copiar prompt</button></div>
+      <pre id="prompt" tabindex="0" aria-label="Prompt para Claude Code">Activa JavaScript para ver el prompt con tus datos.</pre>
+    </div>
+    <p class="note">Se rellena solo con lo que escribes arriba. Si cambias un dato, vuelve a copiarlo.</p>
+
+    <div class="warn">
+      <p><b>No sale idéntico a la primera.</b> Es normal iterar: pide correcciones concretas lámina a lámina («más grande el titular», «el gráfico no se entiende»). Cuanto más preciso seas, menos vueltas.</p>
+      <p>El resultado cambia según la herramienta y el momento: tu carrusel no será igual que el de la publicación.</p>
+      <p><b>Revisa textos y datos antes de publicar.</b> Los datos de ejemplo son inventados y las cifras que Claude proponga pueden ser erróneas. La última palabra es tuya.</p>
+    </div>
+  </section>
+
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+
+<script type="text/plain" id="tpl">Actúa como director creativo y desarrollador de vídeo. Quiero un CARRUSEL ANIMADO de Instagram sobre este tema: {TEMA}.
+
+Trabajas en esta carpeta, que está vacía. No tienes acceso a mis archivos ni a nada más, así que ve paso a paso y no des nada por supuesto. No me preguntes durante la construcción: si falta algo, decide tú y dímelo al final.
+
+══════ MI MARCA ══════
+- Cuenta de Instagram: {USUARIO} (aparece abajo en cada lámina).
+- Color de marca: {COLOR}. Es el protagonista: palabras clave, botones y la última lámina a pantalla completa.
+- Fondo: un tono muy oscuro que combine con el color de marca. Texto: casi blanco.
+- Tipografías: una de titulares, gruesa y condensada (por ejemplo Bricolage Grotesque 800) y otra limpia para el resto (por ejemplo Inter). Descárgalas a la carpeta y cárgalas en local con @font-face. No uses nada de internet al renderizar.
+- Si hay un logo en la carpeta (logo.svg o logo.png), úsalo arriba a la izquierda desde la lámina 2. Si no, no lo inventes: pon solo el usuario.
+- Estética: premium, limpia, cercana. Evita sci-fi, hologramas, partículas, mascotas, fondos de stock y emojis grandes.
+
+══════ PASO 1: EL GUION (antes de construir nada) ══════
+Muéstrame una tabla con una fila por lámina y estas columnas: nº y papel (portada / problema / paso / resultado / cierre) · TITULAR exacto · línea de apoyo exacta (o ninguna) · duración en segundos · gráfico (qué aparece, qué se mueve y en qué segundo) · cómo entra el titular.
+Antes de la tabla, dame 3 portadas alternativas ordenadas, elige una y justifica en una línea por qué haría deslizar.
+Después PARA y espera mi «OK». No construyas nada hasta que te lo diga.
+
+══════ QUÉ ES ══════
+- 7 láminas. Cada una es un VÍDEO MP4 independiente de 4 a 7 segundos, animado y MUDO (sin voz, sin música, sin pista de audio).
+- Vertical 4:5, 1080×1350 px, 30 fps. Yo las subiré en orden a Instagram como carrusel de vídeos.
+- Todo el mensaje se entiende LEYENDO: el texto en pantalla hace de voz. Cada lámina dura lo que cuesta leerla: 0,6 s + 0,3 s por palabra, mínimo 4 s y máximo 7 s.
+
+══════ REGLAS DE CONTENIDO ══════
+PORTADA (lámina 1)
+- Hook que choca: una afirmación concreta, casi increíble, que nombra la herramienta o un número, y abre un bucle de curiosidad: promete el resultado pero NO da el cómo (el cómo va en las láminas siguientes). Ejemplos de mecanismo: «[Herramienta] me hizo X. Yo no toqué nada», «N minutos. Cero edición». Los titulares tibios o abstractos se descartan: si no provoca un «¿en serio?», cámbialo.
+- Titular de 3 a 7 palabras, enorme, y una línea de apoyo que invite a deslizar. Hay movimiento desde el primer fotograma (nada de títulos quietos) y un «desliza →».
+CADA LÁMINA
+- UN titular + UNA línea de apoyo opcional + UN gráfico animado. Nada más.
+- Titular: máximo 8 palabras, en MAYÚSCULAS, 2 a 4 líneas cortas, con 1 o 2 palabras clave en el color de marca.
+- Apoyo: una frase de máximo 18 palabras, en minúsculas, de tú, sin tecnicismos. Si el titular ya se entiende, no la pongas.
+- Máximo ~25 palabras en pantalla por lámina. Cada lámina es útil por sí sola: da un paso, un dato, un ejemplo o una plantilla. Si solo «anuncia» la siguiente, se elimina.
+GRÁFICOS
+- Si el tema habla de una herramienta real, el gráfico es una copia fiel de su interfaz, dibujada en HTML y CSS, a tamaño real y con acciones (escribir, contar, marcar, cargar). Nada de tarjetas genéricas grandes y quietas. Si necesitas un logo real, descárgalo de la web oficial; si no puedes, usa el nombre en texto. No lo inventes.
+- Describe qué se mueve y en qué segundo. Lo importante aparece primero y se queda quieto el tiempo de leerlo.
+- Datos de ejemplo: todos ficticios, coherentes entre sí y rotulados «DEMO · DATOS FICTICIOS». Nada de nombres, correos, reseñas ni cifras reales. Nunca presentes una cifra inventada como estadística real.
+ÚLTIMA LÁMINA
+- A pantalla completa en color de marca, con el botón «COMENTA {PALABRA}» y un cursor que hace clic. Debajo: «y te mando la guía gratis por privado». Una sola llamada a la acción.
+
+══════ ESTILO MOTION (lo que separa un resultado brutal de una presentación con animaciones) ══════
+- Cada elemento entra de forma DISTINTA según su papel: golpe con escala 2,2→1 y desenfoque 16→0 px (power4.out, 0,3 s) solo para el hook; palabra a palabra con desenfoque (6→0 px, 0,13 s, 60–120 ms entre palabras); letra a letra para un nombre; barrido; texto que sube desde una máscara. Nunca el mismo efecto para todo.
+- Easing con carácter: al llegar expo.out o power4.out (cola larga), al salir power3.in y más corto. Nunca el mismo power2.out para todo.
+- Un titular que ya ha aterrizado se queda quieto; el movimiento pasa a lo siguiente.
+- Prohibido: elementos que respiran, flotan o pulsan sin motivo, empujes lentos al final, rebotes en interfaces, anillos de clic, partículas, todas las láminas entrando igual.
+- Los cambios entre láminas tienen causa visible: un objeto que crece y se convierte en lo siguiente, un barrido rápido, un cambio de color del fondo. Nada de fundidos cruzados.
+- Incluye al menos UN MOMENTO WOW: una interfaz con contadores que cuentan, un gráfico que se dibuja o un título con profundidad. Descríbelo en el guion con exactitud.
+- Si algo parece una presentación de PowerPoint con animaciones, rediséñalo.
+
+══════ TÉCNICA (HyperFrames, versión fijada) ══════
+- Cada lámina es una composición HTML de 1080×1350 con UN solo timeline GSAP en pausa, registrado en window.__timelines. Los tiempos son segundos desde el inicio de ESA lámina.
+- Instala GSAP en local (npm install gsap y copia gsap.min.js a la carpeta). Sin CDN, sin red, sin Math.random() ni Date.now(). Si usas repeat: -1, con duración finita.
+- Cada elemento con tiempo lleva data-start y duración y class="clip". No animes visibility ni autoAlpha sobre un elemento .clip (el contenedor de la lámina lo es): anima sus hijos.
+- Usa SIEMPRE esta versión: npx hyperframes@0.8.143. Si dudas de la estructura de un proyecto, ejecuta npx hyperframes@0.8.143 docs compositions (y data-attributes, gsap, rendering).
+- Flujo: crea las 7 láminas → npx hyperframes@0.8.143 check (corrige todos los errores) → npx hyperframes@0.8.143 snapshot (fotogramas PNG) → mírales y corrige → npx hyperframes@0.8.143 render de cada lámina a lamina_1.mp4 … lamina_7.mp4. Renderiza una sola vez, al final.
+- Comprueba cada MP4 con ffprobe: 1080×1350, 30 fps, sin audio, 4–7 s.
+
+══════ REVISIÓN OBLIGATORIA ══════
+Antes de dármelas, mira fotogramas del inicio, del desarrollo y del final de cada lámina (los PNG del snapshot) y comprueba: se lee todo, nada se sale de los márgenes ni queda tapado, el gráfico se entiende, cada lámina entra de forma distinta. Pregúntate en cada una: «¿parece una presentación de PowerPoint con animaciones?». Si la respuesta es sí, rediséñala antes de enseñármela.
+
+══════ AL TERMINAR ══════
+- Dime dónde están los 7 vídeos y qué láminas revisarías tú con más cuidado.
+- Dime qué textos o datos de ejemplo debo revisar antes de publicar.
+- Redacta la descripción de Instagram (máximo 3 hashtags) que pide comentar {PALABRA}.</script>
+
+<script>
+(function(){
+  var $=function(id){return document.getElementById(id)};
+  var cover=$('cover'), tema=$('tema'), pal=$('palabra'), usu=$('usuario'), sw=$('sw');
+  var COLORS=['#2F7BFF','#FF7A1A','#1FB36B','#E5367A','#8B5CF6'];
+  var color=COLORS[0], t=null;
+
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  function rgb(h){var n=parseInt(h.slice(1),16);return [n>>16&255,n>>8&255,n&255]}
+  function hex(a){return '#'+a.map(function(v){return ('0'+Math.round(v).toString(16)).slice(-2)}).join('')}
+  function mix(a,b,k){var x=rgb(a),y=rgb(b);return hex([0,1,2].map(function(i){return x[i]*(1-k)+y[i]*k}))}
+  function lum(h){var c=rgb(h).map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*c[0]+.7152*c[1]+.0722*c[2]}
+
+  function vals(){
+    var p=pal.value.toUpperCase().replace(/[^A-Z0-9ÁÉÍÓÚÜÑ]/g,'').slice(0,14);
+    var u=usu.value.trim().replace(/\s+/g,'').replace(/^@*/,'');
+    return {tema:tema.value.trim(), pal:p, usu:u?'@'+u:''};
+  }
+
+  function paint(){
+    var v=vals();
+    $('cUser').textContent=v.usu||'@tuusuario';
+    $('cTema').textContent=v.tema||'Tu tema';
+    $('cPill').textContent='Comenta '+(v.pal||'PALABRA');
+    var st=cover.style;
+    st.setProperty('--b',color);
+    st.setProperty('--bgc',mix('#05070d',color,.12));
+    st.setProperty('--on-b',lum(color)>.45?'#0b1730':'#ffffff');
+    st.setProperty('--hl',lum(color)<.1?mix(color,'#ffffff',.45):color);
+    fillPrompt();
+  }
+
+  function buildHeadline(){
+    var lines=[['CLAUDE','HIZO','ESTE','CARRUSEL.'],['YO','NO','TOQUÉ','NADA.']], h='';
+    lines.forEach(function(ws,li){
+      h+='<span class="ln l'+(li+1)+'">';
+      ws.forEach(function(w,i){
+        h+='<span class="w'+(li===1&&w==='NADA.'?' kw':'')+'" style="--i:'+i+'">'+w+'</span> ';
+      });
+      h+='</span>';
+    });
+    $('hl').innerHTML=h;
+  }
+
+  function replay(){
+    cover.classList.remove('play'); void cover.offsetWidth; cover.classList.add('play');
+  }
+  function later(){clearTimeout(t); t=setTimeout(replay,500)}
+
+  COLORS.forEach(function(c){
+    var b=document.createElement('button'); b.type='button'; b.style.background=c; b.dataset.c=c; b.setAttribute('aria-label','Color '+c);
+    b.addEventListener('click',function(){setColor(c)}); sw.appendChild(b);
+  });
+  var picker=document.createElement('input'); picker.type='color'; picker.value=color; picker.setAttribute('aria-label','Otro color');
+  picker.addEventListener('input',function(){setColor(picker.value)}); sw.appendChild(picker);
+  function setColor(c){
+    color=c.toUpperCase(); picker.value=c.toLowerCase();
+    Array.prototype.forEach.call(sw.querySelectorAll('button'),function(b){b.setAttribute('aria-pressed',b.dataset.c.toUpperCase()===color?'true':'false')});
+    paint();
+  }
+
+  var tpl=$('tpl').textContent.replace(/^\n/,''), pre=$('prompt');
+  function fillPrompt(){
+    var v=vals();
+    pre.textContent=tpl
+      .replace(/\{TEMA\}/g,v.tema||'[tu tema]')
+      .replace(/\{PALABRA\}/g,v.pal||'[PALABRA]')
+      .replace(/\{USUARIO\}/g,v.usu||'[@tuusuario]')
+      .replace(/\{COLOR\}/g,color);
+  }
+
+  [tema,pal,usu].forEach(function(el){el.addEventListener('input',function(){paint();later()})});
+  $('again').addEventListener('click',replay);
+
+  buildHeadline(); setColor(color); replay();
+
+  var btn=$('copy');
+  function done(){btn.textContent='Copiado';btn.classList.add('ok');setTimeout(function(){btn.textContent='Copiar prompt';btn.classList.remove('ok')},2200)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selecciona y copia';setTimeout(function(){btn.textContent='Copiar prompt'},2600)}
+  btn.addEventListener('click',function(){
+    var txt=pre.textContent;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}
+  });
+})();
+</script>
+</body>
+</html>
