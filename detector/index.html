@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Analiza tus reseñas de Google con un semáforo y respóndelas sin meterte en líos. Con el prompt para hacerlo con las tuyas.">
+<meta property="og:title" content="Detector de reseñas falsas">
+<meta property="og:description" content="Toca una reseña y mira qué pistas tiene. Con el prompt para analizar las tuyas.">
+<title>Detector de reseñas falsas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: página oscura de marca; arriba la lista de reseñas (tarjetas claras tipo Google), debajo el panel del detector con medidor, pistas y respuesta. */
+:root{
+  color-scheme:dark;
+  --bg:#07101F; --panel:#0E1C36; --line:#1d3358; --ink:#F4F7FB; --mute:#9db0cc;
+  --blue:#2F7BFF; --blue-soft:#7fb0ff; --orange:#FF7A1A;
+  --ok:#22b26b; --mid:#f5a623; --bad:#ff4d5e;
+  --paper:#ffffff; --paper-ink:#202124; --paper-mute:#5f6368; --paper-line:#e3e7ee;
+  --fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}
+h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+
+/* cabecera de la demo */
+.bizbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.biz b{font:700 18px/1.2 var(--fd)}
+.biz span{display:block;color:var(--mute);font-size:13px}
+.demo{font:600 11px/1 var(--fb);letter-spacing:.1em;color:var(--orange)}
+.toggle{display:flex;align-items:center;gap:10px;font:600 14px/1 var(--fb);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:999px;
+  padding:8px 14px 8px 8px;min-height:44px;cursor:pointer}
+.toggle .sw{width:40px;height:24px;border-radius:12px;background:#2a3a58;position:relative;transition:background .2s}
+.toggle .sw::after{content:"";position:absolute;left:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#fff;transition:transform .2s}
+.toggle[aria-pressed="true"] .sw{background:var(--blue)}
+.toggle[aria-pressed="true"] .sw::after{transform:translateX(16px)}
+
+/* reseñas */
+.list{display:flex;flex-direction:column;gap:10px}
+.rv{position:relative;display:block;width:100%;text-align:left;background:var(--paper);color:var(--paper-ink);border:3px solid transparent;border-radius:16px;
+  padding:14px 16px 14px;cursor:pointer;font:inherit;transition:border-color .15s,transform .15s}
+.rv:hover{transform:translateY(-2px)}
+.rv[aria-pressed="true"]{border-color:var(--blue);box-shadow:0 0 0 4px rgba(47,123,255,.25)}
+.rvh{display:flex;align-items:center;gap:10px;padding-right:34px}
+.av{width:36px;height:36px;border-radius:50%;color:#fff;display:grid;place-items:center;font-weight:600;flex:none}
+.rvh b{display:block;font-weight:600;font-size:15px;line-height:1.2}
+.rvh small{display:block;font-size:12.5px;color:var(--paper-mute)}
+.st{color:#FBBC04;letter-spacing:1px;font-size:15px;margin-top:8px}
+.st i{font-style:normal;color:#dadce0}
+.st span{color:var(--paper-mute);font-size:12.5px;letter-spacing:0;margin-left:8px}
+.rv p{margin:6px 0 0;font-size:14.5px;line-height:1.45}
+.lamp{position:absolute;right:14px;top:14px;width:22px;height:22px;border-radius:50%;background:#e8eaed;transition:background .25s,box-shadow .25s}
+.lamp.ok{background:var(--ok);box-shadow:0 0 12px var(--ok)}.lamp.mid{background:var(--mid);box-shadow:0 0 12px var(--mid)}.lamp.bad{background:var(--bad);box-shadow:0 0 12px var(--bad)}
+
+/* panel del detector */
+.det{margin-top:16px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px}
+.det-top{display:flex;gap:16px;align-items:center}
+.gauge{flex:none;width:150px}
+.gauge svg{display:block;width:100%;height:auto}
+#needle{transform-origin:75px 78px;transform:rotate(-90deg);transition:transform .7s cubic-bezier(.2,1.3,.4,1)}
+.verd{min-width:0}
+.verd .k{font:600 11px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--mute)}
+.verd .v{font:800 26px/1.1 var(--fd);margin-top:6px}
+.verd .v.ok{color:var(--ok)}.verd .v.mid{color:var(--mid)}.verd .v.bad{color:var(--bad)}
+.verd .w{color:var(--mute);font-size:13.5px;margin-top:4px}
+.sig{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}
+.sig span{display:flex;align-items:center;gap:8px;font:600 13px/1.2 var(--fb);color:#6f84a6;border:1px solid var(--line);border-radius:12px;padding:10px 10px;transition:all .2s}
+.sig span::before{content:"";flex:none;width:9px;height:9px;border-radius:50%;background:#2a3a58}
+.sig span.on{color:#fff;border-color:var(--bad);background:rgba(255,77,94,.12)}
+.sig span.on::before{background:var(--bad);box-shadow:0 0 8px var(--bad)}
+.reply{margin-top:16px;border-radius:14px;background:#0a1730;border:1px solid var(--line);padding:14px}
+.reply .k{font:600 11px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+.reply p{margin:8px 0 0;font-size:14.5px;line-height:1.5}
+.reply.out p{opacity:0}
+.reply p{transition:opacity .2s}
+.summary{display:none;margin-top:16px;font-size:14px;color:var(--mute)}
+.summary b{color:var(--ink)}
+.all .summary{display:block}
+.hint{color:var(--mute);font-size:14px;margin:12px 2px 0}
+
+/* sección del prompt */
+.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}
+.how .lead{margin-top:10px}
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}
+.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.steps span{color:var(--mute);font-size:14.5px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy:hover{filter:brightness(1.1)}
+.copy.ok{background:#1f9d62}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}
+.warn b{color:var(--orange)}
+.sign{color:var(--mute);font-size:13px;text-align:center}
+.sign b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){#needle,.rv,.lamp,.sig span,.reply p{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · DETECTOR</div>
+    <h1>Detector de <em>reseñas falsas</em></h1>
+    <p class="lead">Toca una reseña y mira qué pistas tiene, cómo de sospechosa es y la respuesta educada que le darías. Debajo, el prompt para hacerlo con las tuyas.</p>
+  </header>
+
+  <section aria-label="Demo del detector" id="demoSec">
+    <div class="bizbar">
+      <div class="biz"><b>Bar El Puerto</b><span>4,1 ★ · 212 reseñas · <span class="demo" style="display:inline">DEMO · DATOS FICTICIOS</span></span></div>
+      <button class="toggle" id="all" type="button" aria-pressed="false"><span class="sw"></span>Ver todas</button>
+    </div>
+    <div class="list" id="list"></div>
+
+    <div class="det" id="det" aria-live="polite">
+      <div class="det-top">
+        <div class="gauge" aria-hidden="true">
+          <svg viewBox="0 0 150 90">
+            <path d="M12 78 A63 63 0 0 1 43.5 23.4" fill="none" stroke="#22b26b" stroke-width="13"/>
+            <path d="M45.5 22.3 A63 63 0 0 1 104.5 22.3" fill="none" stroke="#f5a623" stroke-width="13"/>
+            <path d="M106.5 23.4 A63 63 0 0 1 138 78" fill="none" stroke="#ff4d5e" stroke-width="13"/>
+            <g id="needle"><path d="M75 78 L75 24" stroke="#F4F7FB" stroke-width="5" stroke-linecap="round"/></g>
+            <circle cx="75" cy="78" r="8" fill="#F4F7FB"/>
+          </svg>
+        </div>
+        <div class="verd"><div class="k">Semáforo</div><div class="v" id="verdict">Toca una reseña</div><div class="w" id="why">Las pistas se encienden abajo.</div></div>
+      </div>
+      <div class="sig" id="sig">
+        <span data-s="gen">Elogios perfectos</span>
+        <span data-s="det">Cero detalles</span>
+        <span data-s="new">Cuenta nueva</span>
+        <span data-s="copy">Texto calcado a otra</span>
+      </div>
+      <div class="reply" id="reply"><div class="k">Respuesta pública sugerida</div><p id="replyTxt">Elige una reseña para ver qué le contestarías.</p></div>
+      <div class="summary" id="summary"></div>
+    </div>
+    <p class="hint">El semáforo es una pista, no una prueba. Nunca acuses a nadie en público.</p>
+  </section>
+
+  <section class="how" aria-label="Cómo analizar las tuyas">
+    <h2>Analiza las tuyas en 3 pasos</h2>
+    <p class="lead">Claude te devuelve una página con tus reseñas, su semáforo, las pistas que ha visto y una respuesta educada para cada una.</p>
+    <ol class="steps">
+      <li><div class="dot">1</div><div class="t"><b>Copia tus reseñas</b><span>De Google Maps, con el nombre del autor y cuántas reseñas tiene su perfil.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>Pega el prompt en Claude</b><span>Cambia lo que va entre corchetes y pega tus reseñas donde se indica.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>Abre la página y actúa</b><span>Copia las respuestas y denuncia las rojas desde tu Perfil de Empresa de Google.</span></div></li>
+    </ol>
+
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt del detector</span><button class="copy" id="copy" type="button">Copiar prompt</button></div>
+      <pre id="prompt">Actúa como experto en reputación online de negocios locales. Mi negocio es [tipo de negocio] en [ciudad].
+
+Te pego mis reseñas de Google, cada una con el nombre del autor y cuántas reseñas tiene su perfil:
+[PEGA AQUÍ LAS RESEÑAS]
+
+Para cada reseña, analiza estas señales:
+- elogios o críticas genéricos, sin ningún detalle concreto;
+- lenguaje demasiado perfecto o calcado entre reseñas;
+- menciones a productos o servicios que no ofrezco;
+- perfiles con muy pocas reseñas.
+
+Devuélveme UNA página HTML lista para abrir con:
+1. Una tabla con cada reseña.
+2. Un semáforo (verde: creíble; ámbar: dudosa; rojo: sospechosa).
+3. Las señales que has encontrado en cada una.
+4. Una respuesta pública educada para cada una, sin acusar a nadie.
+
+Al final, si hay alguna en rojo, explícame en 3 pasos cómo pedir a Google que la revise desde mi Perfil de Empresa.</pre>
+    </div>
+
+    <p class="warn"><b>Ninguna herramienta puede asegurar al 100 % que una reseña sea de IA.</b> El semáforo es una pista, no una prueba. No acuses a nadie en público y revisa cada respuesta antes de publicarla.</p>
+  </section>
+
+  <p class="sign"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+
+<script>
+(function(){
+  var SIG={gen:'Elogios perfectos',det:'Cero detalles',new:'Cuenta nueva',copy:'Texto calcado a otra'};
+  var R=[
+    {n:'Carlos R.',c:'#1E8E3E',s:5,meta:'1 reseña · hace 2 días',t:'¡Todo perfecto, increíble, el mejor sitio de la ciudad! Volveremos seguro.',sig:['gen','det','new'],
+     r:'¡Gracias por tu valoración, Carlos! Nos encantaría saber qué fue lo que más te gustó para seguir mejorando. Te esperamos pronto.'},
+    {n:'Marta G.',c:'#1a73e8',s:4,meta:'Local Guide · 86 reseñas · hace 1 semana',t:'Las bravas, muy buenas y bien picantes. Pedimos el pulpo y tardó casi 30 minutos, pero Rubén nos avisó y nos invitó al café.',sig:[],
+     r:'¡Gracias, Marta! Nos alegra que te gustaran las bravas. Tomamos nota de la espera del pulpo y se lo diremos a cocina. Rubén estará encantado de leerte.'},
+    {n:'Laura M.',c:'#8E44AD',s:5,meta:'1 reseña · hace 2 días',t:'Experiencia maravillosa de principio a fin. Atención excelente y ambiente inmejorable.',sig:['gen','det','new','copy'],
+     r:'Gracias por escribirnos, Laura. No encontramos tu visita en nuestras reservas; si quieres, cuéntanos por privado qué día viniste y lo comprobamos.'},
+    {n:'Pedro L.',c:'#e8710a',s:1,meta:'2 reseñas · hace 5 días',t:'Horrible. Muy mal todo. No vayáis.',sig:['gen','det','new'],
+     r:'Sentimos mucho leer esto, Pedro. No nos consta ninguna queja ese día. Escríbenos a info@barelpuerto.es para saber qué pasó y poder solucionarlo.'},
+    {n:'Javi P.',c:'#D93025',s:5,meta:'3 reseñas · hace 3 días',t:'Calidad-precio insuperable. Sin duda, una experiencia que recomiendo a todo el mundo.',sig:['gen','det'],
+     r:'¡Gracias, Javi! ¿Qué plato nos recomendarías a los que vienen por primera vez? Nos encantará verte de nuevo.'},
+    {n:'Ana S.',c:'#00897b',s:3,meta:'Local Guide · 41 reseñas · hace 2 semanas',t:'El menú del día bien (lentejas y merluza), pero el sábado por la noche había mucho ruido y costaba hablar.',sig:[],
+     r:'Gracias por contarlo tan claro, Ana. Nos alegra que te gustara el menú. Tienes razón con el ruido del sábado: estamos mirando poner paneles en la sala.'}
+  ];
+  function nivel(x){var k=x.sig.length;return k>=3?'bad':(k>=1?'mid':'ok')}
+  var TXT={ok:'Creíble',mid:'Dudosa',bad:'Sospechosa'};
+  var WHY={ok:'Detalles concretos y perfil con historial.',mid:'Algunas pistas, pero no concluyentes.',bad:'Varias pistas a la vez. Pide a Google que la revise.'};
+  var ANG={ok:-60,mid:0,bad:60};
+  var list=document.getElementById('list'),needle=document.getElementById('needle'),verdict=document.getElementById('verdict'),why=document.getElementById('why'),
+      sig=document.getElementById('sig'),reply=document.getElementById('reply'),replyTxt=document.getElementById('replyTxt'),allBtn=document.getElementById('all'),
+      det=document.getElementById('det'),summary=document.getElementById('summary'),cur=-1,showAll=false;
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+  R.forEach(function(x,i){
+    var b=document.createElement('button');b.type='button';b.className='rv';b.setAttribute('aria-pressed','false');
+    b.innerHTML='<div class="rvh"><div class="av" style="background:'+x.c+'">'+x.n[0]+'</div><div><b>'+esc(x.n)+'</b><small>'+esc(x.meta)+'</small></div></div>'
+      +'<div class="st">'+'★'.repeat(x.s)+'<i>'+'★'.repeat(5-x.s)+'</i></div><p>'+esc(x.t)+'</p><span class="lamp" aria-hidden="true"></span>';
+    b.addEventListener('click',function(){pick(i)});list.appendChild(b);
+  });
+  function lamps(){
+    Array.prototype.forEach.call(list.children,function(b,i){
+      var l=b.querySelector('.lamp');l.className='lamp'+((showAll||i===cur)?' '+nivel(R[i]):'');
+      b.setAttribute('aria-pressed',i===cur?'true':'false');
+    });
+  }
+  function pick(i){
+    cur=i;var x=R[i],lv=nivel(x);
+    needle.style.transform='rotate('+ANG[lv]+'deg)';
+    verdict.textContent=TXT[lv];verdict.className='v '+lv;why.textContent=WHY[lv];
+    Array.prototype.forEach.call(sig.children,function(s){s.classList.toggle('on',x.sig.indexOf(s.dataset.s)>-1)});
+    reply.classList.add('out');setTimeout(function(){replyTxt.textContent=x.r;reply.classList.remove('out')},180);
+    lamps();
+  }
+  allBtn.addEventListener('click',function(){
+    showAll=!showAll;allBtn.setAttribute('aria-pressed',String(showAll));det.classList.toggle('all',showAll);
+    var c={ok:0,mid:0,bad:0};R.forEach(function(x){c[nivel(x)]++});
+    summary.innerHTML='De 6 reseñas: <b>'+c.ok+' creíbles</b>, <b>'+c.mid+' dudosa</b> y <b>'+c.bad+' sospechosas</b>. Responde a todas con educación y denuncia solo las rojas.';
+    lamps();
+  });
+
+  var btn=document.getElementById('copy'),pre=document.getElementById('prompt');
+  function done(){btn.textContent='Copiado';btn.classList.add('ok');setTimeout(function(){btn.textContent='Copiar prompt';btn.classList.remove('ok')},2200)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selecciona y copia';setTimeout(function(){btn.textContent='Copiar prompt'},2600)}
+  btn.addEventListener('click',function(){
+    var txt=pre.innerText;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}
+  });
+})();
+</script>
+</body>
+</html>
