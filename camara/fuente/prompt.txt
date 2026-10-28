@@ -1,0 +1,46 @@
+Actúa como desarrollador creativo senior especializado en Three.js, geometría procedimental y visualización publicitaria de productos.
+
+Quiero que construyas una página web interactiva de visualización 3D.
+
+PRODUCTO:
+Tipo: [TIPO_PRODUCTO]
+Nombre: [NOMBRE_PRODUCTO]
+Colores: [COLORES]
+Materiales: [MATERIALES]
+Piezas visibles: [PIEZAS]
+Estilo visual: [ESTILO]
+
+OBJETIVO:
+Crear una experiencia premium en la que un modelo tridimensional del producto pueda rotarse y desmontarse progresivamente.
+
+REQUISITOS:
+1. Construye un modelo 3D procedimental reconocible del producto indicado.
+2. Divide el modelo en componentes independientes y coherentes.
+3. Define una posición de ensamblaje y otra de despiece para cada componente.
+4. Implementa un deslizador de separación del 0 al 100%.
+5. Permite rotar el modelo mediante arrastre.
+6. Incluye un botón para reiniciar la vista.
+7. Permite seleccionar y destacar componentes.
+8. Añade una demostración animada del despiece completo.
+9. Utiliza materiales, luces y sombras adecuados para conseguir calidad de presentación comercial.
+10. Diseña una interfaz responsive, limpia y profesional.
+11. No utilices modelos propietarios sin autorización.
+12. No inventes detalles internos que aparenten ser especificaciones exactas del producto real. Si no hay información técnica suficiente, construye una maqueta conceptual e identifícala claramente.
+
+ENTREGA:
+Genera los archivos funcionales necesarios:
+- index.html
+- estilos CSS, cuando corresponda
+- JavaScript
+- configuración y dependencias, si son necesarias
+- README con instrucciones de ejecución
+
+Incluye las dependencias localmente o una configuración reproducible.
+La página debe funcionar sin credenciales ni servicios de pago.
+
+CALIDAD:
+El resultado debe parecer una demostración de producto realizada por un estudio creativo.
+Evita primitivas básicas sin tratamiento visual, animaciones bruscas, reflejos artificiales excesivos e interfaces recargadas.
+Primero construye un prototipo funcional. Después mejora materiales, iluminación y animaciones.
+Comprueba que todos los controles funcionen.
+No entregues únicamente una explicación o fragmentos de código. Entrega el proyecto ejecutable.
