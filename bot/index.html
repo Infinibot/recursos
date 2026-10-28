@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Simulador de un chat de atención al cliente de un café de ejemplo, con el prompt para pedirle a Claude Code el proyecto del chatbot.">
+<meta property="og:title" content="Prueba tu chatbot de WhatsApp">
+<meta property="og:description" content="Un simulador local y el prompt completo para crear el proyecto con Claude Code.">
+<title>Prueba tu chatbot de WhatsApp</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: página oscura de marca (marino + azul eléctrico) con un móvil de demostración en el centro. */
+:root{
+  color-scheme:dark;
+  --bg:#07101F; --panel:#0E1C36; --line:#1d3358; --ink:#F4F7FB; --mute:#9db0cc;
+  --blue:#2F7BFF; --blue-soft:#7fb0ff; --orange:#FF7A1A;
+  --fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}
+h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+
+/* demo: móvil de simulación */
+.badge{display:inline-block;font:700 11px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--orange);border:1px solid rgba(255,122,26,.55);border-radius:999px;padding:8px 12px;margin-bottom:14px}
+.phone{background:#000;border:6px solid #25324f;border-radius:34px;padding:8px;box-shadow:0 24px 60px rgba(0,0,0,.5);max-width:400px;margin:0 auto}
+.screen{background:#0b141a;border-radius:26px;overflow:hidden;display:flex;flex-direction:column;height:520px}
+.bar{background:#202c33;display:flex;align-items:center;gap:12px;padding:12px 16px}
+.av{flex:none;width:38px;height:38px;border-radius:50%;background:var(--blue);color:#fff;font:800 18px/38px var(--fd);text-align:center}
+.bar b{display:block;font-size:16px;font-weight:600;color:#e9edef;line-height:1.2}
+.bar small{display:block;font-size:11px;font-weight:600;letter-spacing:.06em;color:#8fa3ad}
+.msgs{flex:1;overflow-y:auto;padding:14px 12px;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth}
+.m{max-width:84%;padding:8px 12px 9px;border-radius:12px;font-size:15px;line-height:1.4;color:#e9edef;overflow-wrap:anywhere;animation:in .18s ease-out}
+.m.bot{align-self:flex-start;background:#202c33;border-top-left-radius:3px}
+.m.me{align-self:flex-end;background:#005c4b;border-top-right-radius:3px}
+.m.info{align-self:center;max-width:94%;background:rgba(255,255,255,.07);color:#aebac1;font-size:12.5px;text-align:center;border-radius:10px}
+@keyframes in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.quick{display:flex;flex-wrap:wrap;gap:8px;padding:8px 12px 4px;background:#0b141a}
+.quick button{font:600 14px/1 var(--fb);color:#e9edef;background:#202c33;border:1px solid #2f424d;border-radius:999px;padding:11px 16px;min-height:44px;cursor:pointer;transition:background .15s,border-color .15s}
+.quick button:hover{border-color:var(--blue)}
+.quick button:active{background:var(--blue);border-color:var(--blue)}
+.send{display:flex;gap:8px;padding:8px 12px 12px;background:#0b141a}
+.send input{flex:1;min-width:0;font:400 15px/1 var(--fb);color:#e9edef;background:#202c33;border:1px solid #2f424d;border-radius:999px;padding:0 16px;min-height:44px}
+.send input::placeholder{color:#7f929c}
+.send button{flex:none;font:700 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:999px;padding:0 18px;min-height:44px;cursor:pointer}
+.send button:hover{filter:brightness(1.1)}
+.hint{color:var(--mute);font-size:14px;margin:16px 2px 0}
+.hint b{color:var(--ink);font-weight:600}
+
+/* sección del prompt */
+.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}
+.how .lead{margin-top:10px}
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}
+.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.steps span{color:var(--mute);font-size:14.5px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:700 14px/1 var(--fb);letter-spacing:.04em;background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy:hover{filter:brightness(1.1)}
+.copy.ok{background:#1f9d62}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}
+.warn b{color:var(--orange)}
+.sig{color:var(--mute);font-size:13px;text-align:center}
+.sig b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.m{animation:none}.msgs{scroll-behavior:auto}.quick button{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · BOT</div>
+    <h1>Prueba tu <em>chatbot de WhatsApp</em></h1>
+    <p class="lead">Una demo de atención al cliente que puedes usar antes de crear tu propio proyecto. Debajo tienes el prompt para pedírselo a Claude Code.</p>
+  </header>
+
+  <section aria-label="Simulador de chat">
+    <span class="badge">Simulador local · No conectado a WhatsApp</span>
+    <div class="phone">
+      <div class="screen">
+        <div class="bar"><div class="av" aria-hidden="true">C</div><div><b>Café Noroeste</b><small>DEMO · DATOS FICTICIOS</small></div></div>
+        <div class="msgs" id="msgs" aria-live="polite"></div>
+        <div class="quick" id="quick" role="group" aria-label="Opciones rápidas">
+          <button type="button" data-k="horarios">Horarios</button>
+          <button type="button" data-k="carta">Carta</button>
+          <button type="button" data-k="reservas">Reservas</button>
+        </div>
+        <form class="send" id="form" autocomplete="off">
+          <input id="q" type="text" maxlength="120" placeholder="Escribe una pregunta sencilla…" aria-label="Escribe tu pregunta">
+          <button type="submit">Enviar</button>
+        </form>
+      </div>
+    </div>
+    <p class="hint"><b>Cómo funciona:</b> las respuestas están escritas de antemano y se eligen por palabras clave. No hay inteligencia artificial ni conexión con WhatsApp. Pulsa un botón o prueba con «¿Abrís el sábado?».</p>
+  </section>
+
+  <section class="how" aria-label="Cómo hacer el tuyo">
+    <h2>Haz el tuyo en 3 pasos</h2>
+    <p class="lead">Claude Code te programa la base del proyecto. La conexión con WhatsApp la configuras tú, y lo pruebas antes de usarlo con clientes.</p>
+    <ol class="steps">
+      <li><div class="dot">1</div><div class="t"><b>Prueba el simulador de chat</b><span>Mira cómo respondería con datos de ejemplo.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>Copia el prompt en Claude Code y adapta tus datos</b><span>Cambia solo lo que va entre corchetes: negocio, horario, servicios y contacto.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>Configura Meta en entorno de pruebas</b><span>Verifica el proyecto con el número de pruebas antes de desplegarlo.</span></div></li>
+    </ol>
+
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt completo</span><button class="copy" id="copy" type="button">COPIAR PROMPT</button></div>
+      <pre id="prompt">Actúa como desarrollador senior de integraciones con la WhatsApp Business Platform.
+
+Quiero que construyas un proyecto Node.js para un chatbot de atención al cliente.
+
+DATOS:
+Negocio: [NOMBRE_NEGOCIO]
+Horario: [HORARIO]
+Servicios: [SERVICIOS]
+Información para contactar con una persona: [CONTACTO]
+
+OBJETIVO:
+Recibir mensajes de WhatsApp mediante la API oficial de Meta y responder únicamente a preguntas frecuentes relacionadas con los datos proporcionados.
+
+ENTREGA UN PROYECTO EJECUTABLE CON:
+
+1. Servidor Node.js.
+2. Endpoint GET para verificar el webhook.
+3. Endpoint POST para recibir mensajes.
+4. Verificación de firma X-Hub-Signature-256.
+5. Integración para responder mediante WhatsApp Cloud API.
+6. Archivo .env.example sin secretos.
+7. Validación de datos y manejo de errores.
+8. Reintentos controlados cuando correspondan.
+9. Control básico de duplicados.
+10. Límites para evitar respuestas repetidas.
+11. Respuesta segura cuando no se conoce un dato.
+12. Escalado a una persona cuando se solicita.
+13. Pruebas automatizadas usando datos simulados.
+14. README con instrucciones de ejecución y despliegue HTTPS.
+
+REGLAS:
+No inventes información del negocio.
+No incluyas tokens reales.
+No envíes mensajes a números reales.
+No despliegues automáticamente.
+No utilices endpoints privados de WhatsApp Web.
+Utiliza la API oficial.
+No envíes mensajes fuera de las condiciones permitidas por Meta.
+Indica las limitaciones de la ventana de atención de 24 horas y cuándo se requieren plantillas aprobadas.
+
+Genera todos los archivos del proyecto.
+
+Después explica cómo configurarlo con una app de prueba de Meta, cómo probarlo localmente y qué revisar antes de producción.
+
+No consideres terminada la integración hasta superar las pruebas, verificar los permisos y confirmar que el webhook funciona.</pre>
+    </div>
+
+    <p class="warn"><b>Aviso.</b> Esta demo no envía ni recibe mensajes reales. La integración requiere credenciales, configuración, seguridad y cumplimiento de las condiciones de WhatsApp Business Platform. Pueden aplicarse costes.</p>
+  </section>
+
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+
+<script>
+(function(){
+  /* Respuestas predefinidas (datos ficticios de Café Noroeste). No hay llamadas de red ni se guarda nada. */
+  var R={
+    horarios:'De lunes a viernes abrimos de 08:00 a 20:00. Los sábados, de 10:00 a 14:00. Los domingos, cerrado.',
+    sabado:'Sí, de 10:00 a 14:00.',
+    domingo:'Los domingos estamos cerrados.',
+    carta:'Servimos desayunos y café para llevar. Esta es una demo: aquí irían tu carta y tus precios reales.',
+    reservas:'Las reservas de mesa las gestiona una persona del equipo. Esta demo no hace ninguna reserva ni envía tu solicitud a nadie. Aquí aparecería tu información de contacto.',
+    persona:'Te paso con una persona del equipo. En esta demo no se contacta con nadie: aquí aparecería tu información de contacto.',
+    nose:'No tengo ese dato y prefiero no inventarlo. Puedo ayudarte con horarios, carta o reservas, o pasarte con una persona del equipo.'
+  };
+  var msgs=document.getElementById('msgs'), form=document.getElementById('form'), q=document.getElementById('q');
+  function add(cls,text){var d=document.createElement('div');d.className='m '+cls;d.textContent=text;msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight}
+  function norm(s){return s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'')}
+  function pick(t){
+    var s=norm(t);
+    if(/persona|humano|hablar|agente|alguien/.test(s)) return 'persona';
+    if(/reserv|mesa/.test(s)) return 'reservas';
+    if(/sabado/.test(s)) return 'sabado';
+    if(/domingo/.test(s)) return 'domingo';
+    if(/horario|abr|cierr|hora\b|horas\b/.test(s)) return 'horarios';
+    if(/carta|menu|desayun|cafe|comer|servicio/.test(s)) return 'carta';
+    return 'nose';
+  }
+  function ask(label,key){add('me',label);add('bot',R[key])}
+  add('info','DEMO · DATOS FICTICIOS · Simulador local, no conectado a WhatsApp');
+  add('bot','Hola, soy el asistente de Café Noroeste (demo). Elige una opción o escribe una pregunta sencilla.');
+  document.getElementById('quick').addEventListener('click',function(e){
+    var b=e.target.closest('button'); if(!b) return;
+    ask(b.textContent,b.dataset.k);
+  });
+  form.addEventListener('submit',function(e){
+    e.preventDefault();
+    var t=q.value.trim(); if(!t) return;
+    q.value=''; ask(t,pick(t));
+  });
+
+  var btn=document.getElementById('copy'), pre=document.getElementById('prompt');
+  function done(){btn.textContent='COPIADO';btn.classList.add('ok');setTimeout(function(){btn.textContent='COPIAR PROMPT';btn.classList.remove('ok')},2200)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='SELECCIONA Y COPIA';setTimeout(function(){btn.textContent='COPIAR PROMPT'},2600)}
+  btn.addEventListener('click',function(){
+    var txt=pre.innerText;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}
+  });
+})();
+</script>
+</body>
+</html>
