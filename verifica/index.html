@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Encuentra el fallo de una respuesta de IA y llévate el prompt para que la IA se revise sola antes de contestarte.">
+<meta property="og:title" content="El prompt de autorrevisión">
+<meta property="og:description" content="Toca la línea que está mal y llévate el prompt para que la IA se revise sola.">
+<title>El prompt de autorrevisión</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: página oscura de marca (marino + azul eléctrico) con una respuesta de IA de ejemplo en la que hay que tocar la línea errónea. */
+:root{
+  color-scheme:dark;
+  --bg:#07101F; --panel:#0E1C36; --line:#1d3358; --ink:#F4F7FB; --mute:#9db0cc;
+  --blue:#2F7BFF; --blue-soft:#7fb0ff; --orange:#FF7A1A; --red:#ff5a50; --green:#3ddc84;
+  --fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}
+h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+
+/* demo: la respuesta con el fallo */
+.resp{background:#f7f8fb;color:#0b1730;border-radius:18px;padding:16px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.resp .hd{display:flex;justify-content:space-between;align-items:center;font:600 12px/1 var(--fb);letter-spacing:.1em;text-transform:uppercase;color:#5b6475;margin-bottom:10px}
+.resp h3{font-size:22px;margin:4px 6px 8px}
+.row{display:flex;justify-content:space-between;gap:12px;width:100%;font:500 17px/1.3 var(--fb);color:#0b1730;background:none;border:2px solid transparent;border-radius:12px;padding:12px 10px;cursor:pointer;text-align:left}
+.row b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.row:hover{border-color:#cfd8ea}
+.row.bad{border-color:var(--red);background:#ffecea}
+.row.good{border-color:#14a35a;background:#e6f7ee}
+.row.no{border-color:#e3e8f0;opacity:.7}
+.msg{min-height:24px;margin:14px 2px 0;font-size:15px;color:var(--mute)}
+.msg b{color:var(--ink)}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btns button{font:600 14px/1 var(--fb);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:11px 16px;min-height:44px;cursor:pointer}
+.btns .pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.check{display:none;margin-top:14px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 16px;font-size:14.5px}
+.check.on{display:block}
+.check p{margin:6px 0}
+.ok{color:var(--green);font-weight:700}.ko{color:var(--red);font-weight:700}
+.tagd{font:600 11px/1 var(--fb);letter-spacing:.1em;color:var(--orange)}
+
+/* sección del prompt */
+.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}
+.how .lead{margin-top:10px}
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}
+.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.steps span{color:var(--mute);font-size:14.5px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy:hover{filter:brightness(1.1)}
+.copy.ok2{background:#1f9d62}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}
+.warn b{color:var(--orange)}
+.sig{color:var(--mute);font-size:13px;text-align:center}
+.sig b{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · VERIFICA</div>
+    <h1>Toca la línea que está mal. <em>¿La ves?</em></h1>
+    <p class="lead">Es la respuesta del reel. Una de estas líneas tiene un fallo que la IA da con total seguridad. Encuéntralo y mira después cómo se revisa ella sola con el prompt de abajo.</p>
+  </header>
+
+  <section aria-label="Encuentra el fallo">
+    <div class="resp">
+      <div class="hd"><span>Respuesta de ejemplo</span><span class="tagd">DEMO · DATOS FICTICIOS</span></div>
+      <h3>Factura a cliente</h3>
+      <div id="rows">
+        <button class="row" type="button" data-ok="1"><span>Base imponible</span><b>1.200 €</b></button>
+        <button class="row" type="button" data-ok="1"><span>IVA (21 %)</span><b>252 €</b></button>
+        <button class="row" type="button" data-ok="0"><span>Total a pagar</span><b id="tot">1.542 €</b></button>
+        <button class="row" type="button" data-ok="1"><span>Vencimiento</span><b>30 días</b></button>
+      </div>
+    </div>
+    <p class="msg" id="msg" aria-live="polite">Toca una línea.</p>
+    <div class="btns"><button class="pri" type="button" id="rev">Ver cómo se revisa sola</button></div>
+    <div class="check" id="check" aria-live="polite">
+      <p><b>Revisión antes de responder</b></p>
+      <p><span class="ok">✓</span> Base imponible: 1.200 €.</p>
+      <p><span class="ok">✓</span> IVA: 21 % de 1.200 € = 252 €.</p>
+      <p><span class="ko">✕</span> Total: 1.200 + 252 = <b>1.452 €</b>, no 1.542 €. Corregido.</p>
+      <p><b>He supuesto:</b> IVA general del 21 % y que no hay retención.</p>
+      <p><b>No puedo comprobar:</b> los datos fiscales del cliente ni si la operación lleva otro tipo de IVA.</p>
+    </div>
+  </section>
+
+  <section class="how" aria-label="El prompt">
+    <h2>Que se revise sola, en 3 pasos</h2>
+    <p class="lead">Funciona en ChatGPT, Claude, Gemini o la que uses. No hace a la IA infalible, pero le obliga a repasar las cuentas y a decirte qué no sabe.</p>
+    <ol class="steps">
+      <li><div class="dot">1</div><div class="t"><b>Copia el prompt</b><span>Pégalo al principio del chat o guárdalo en las instrucciones de tu proyecto.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>Pide lo que necesites</b><span>Facturas, presupuestos, pedidos, horarios… cualquier cosa con cifras o datos.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>Lee la revisión</b><span>Mira lo marcado como supuesto o sin comprobar: ahí es donde tienes que mirar tú.</span></div></li>
+    </ol>
+
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt de autorrevisión</span><button class="copy" id="copy" type="button">Copiar prompt</button></div>
+      <pre id="prompt">A partir de ahora, antes de darme cualquier respuesta con cifras, fechas, precios o datos concretos, revísala tú primero y sigue estos pasos:
+
+1. RECALCULA: rehaz cada operación paso a paso, por separado, y comprueba que el resultado coincide con lo que vas a decirme. Si no coincide, corrígelo antes de responder.
+2. SUPUESTOS: dime en una lista corta qué has dado por hecho sin que yo te lo dijera (por ejemplo, el tipo de IVA, la fecha o la moneda).
+3. SIN COMPROBAR: marca con [SIN COMPROBAR] cualquier dato que no puedas verificar con lo que te he dado. No lo rellenes inventando.
+4. Si algo no está claro, pregúntamelo en vez de suponerlo.
+
+Formato: primero la respuesta final ya corregida. Debajo, un apartado corto llamado "Revisión" con los cálculos rehechos, los supuestos y lo que queda sin comprobar.</pre>
+    </div>
+
+    <p class="warn"><b>La última comprobación es tuya.</b> Este prompt reduce los despistes, pero no los elimina: antes de mandar una factura o un presupuesto, repasa el total con la calculadora.</p>
+  </section>
+
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+
+<script>
+(function(){
+  var rows=document.querySelectorAll('#rows .row'), msg=document.getElementById('msg');
+  Array.prototype.forEach.call(rows,function(r){
+    r.addEventListener('click',function(){
+      Array.prototype.forEach.call(rows,function(x){x.classList.remove('bad','good','no')});
+      if(r.dataset.ok==='0'){r.classList.add('bad');msg.innerHTML='<b>¡Bien visto!</b> 1.200 + 252 son 1.452 €, no 1.542 €: dos cifras cambiadas de sitio.'}
+      else{r.classList.add('no');msg.innerHTML='Esa está bien. Sigue buscando: el fallo es una suma.'}
+    });
+  });
+  document.getElementById('rev').addEventListener('click',function(){
+    document.getElementById('check').classList.add('on');
+    rows[2].classList.remove('bad','no'); rows[2].classList.add('good');
+    document.getElementById('tot').textContent='1.452 €';
+  });
+
+  var btn=document.getElementById('copy'), pre=document.getElementById('prompt');
+  function done(){btn.textContent='Copiado';btn.classList.add('ok2');setTimeout(function(){btn.textContent='Copiar prompt';btn.classList.remove('ok2')},2200)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selecciona y copia';setTimeout(function(){btn.textContent='Copiar prompt'},2600)}
+  btn.addEventListener('click',function(){
+    var txt=pre.innerText;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}
+  });
+})();
+</script>
+</body>
+</html>
