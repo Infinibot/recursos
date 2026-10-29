@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Adivina qué respuesta escribió la IA y llévate el prompt para responder reseñas sin excusas y sin sonar a robot.">
+<meta property="og:title" content="¿Humano o IA? Responder reseñas">
+<meta property="og:description" content="Adivina qué respuesta escribió la IA y llévate el prompt para responder reseñas sin excusas y sin sonar a robot.">
+<title>¿Humano o IA? Responder reseñas</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: página oscura de marca (marino + azul eléctrico): cabecera, demo que se puede tocar, 3 pasos, prompt y aviso. */
+
+:root{color-scheme:dark;--bg:#07101F;--panel:#0E1C36;--line:#1d3358;--ink:#F4F7FB;--mute:#9db0cc;--blue:#2F7BFF;--blue-soft:#7fb0ff;--orange:#FF7A1A;--red:#ff5a50;--green:#3ddc84;
+--fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;--fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+*,*::before,*::after{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px}
+.card{background:#f7f8fb;color:#0b1730;border-radius:18px;padding:16px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+label.f{display:flex;flex-direction:column;gap:5px;font:600 12px/1.2 var(--fb);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+input,textarea{font:500 16px/1.4 var(--fb);color:var(--ink);background:#0a1529;border:1px solid var(--line);border-radius:12px;padding:11px 12px;min-height:46px;width:100%}
+textarea{min-height:130px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btns button{font:600 14px/1 var(--fb);color:var(--ink);background:#132a52;border:1px solid var(--line);border-radius:999px;padding:11px 16px;min-height:44px;cursor:pointer}
+.btns .pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.btns button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.out{margin-top:14px;font-size:15px;color:var(--mute)}.out b{color:var(--ink)}
+.big{font:800 clamp(30px,9vw,44px)/1 var(--fd);color:var(--ink)}
+.tagd{font:600 11px/1 var(--fb);letter-spacing:.1em;color:var(--orange)}
+.hint{color:var(--mute);font-size:14px;margin:14px 2px 0}
+.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}.how .lead{margin-top:10px}
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}.steps span{color:var(--mute);font-size:14.5px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy.ok{background:#1f9d62}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}.warn b{color:var(--orange)}
+.sig{color:var(--mute);font-size:13px;text-align:center}.sig b{color:var(--ink)}
+table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+th,td{padding:6px 4px;border-bottom:1px solid #e3e8f0;text-align:right}th:first-child,td:first-child{text-align:left}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#5b6475}
+tr.bad td{background:#ffecea;color:#b4231b;font-weight:700}tr.ok td:last-child{color:#14a35a;font-weight:700}
+.ans{margin-top:12px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.ans b{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:8px;background:var(--blue);color:#fff;font-family:var(--fd)}
+.ans p{margin:8px 0 0;font-size:15px}.ans em{display:block;font-style:normal;font:700 11px/1 var(--fb);letter-spacing:.1em;margin-top:10px;color:var(--blue-soft)}
+.ans.win{border-color:var(--blue);box-shadow:0 0 0 2px var(--blue)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · RESEÑA</div>
+    <h1>¿Cuál escribió <em>la IA</em>?</h1>
+    <p class="lead">Una reseña de 1 estrella (de ejemplo) y dos respuestas. Elige la que crees que escribió la IA.</p>
+  </header>
+
+  <section aria-label="Demo">
+    <div class="card">
+      <p class="tagd" style="margin:0 0 6px">RESEÑA DE EJEMPLO · BAR FICTICIO</p>
+      <p style="margin:0;font-weight:600">★☆☆☆☆ «Esperamos 40 minutos para comer y el arroz llegó frío. No volvemos.»</p>
+    </div>
+    <div class="ans" id="aA"><b>A</b><p>Lo sentimos de verdad: 40 minutos de espera y un arroz frío no es lo que queremos servir. Gracias por contarlo. Ojalá nos deis otra oportunidad: nos encantaría que esta vez saliera bien.</p><em id="tA"></em></div>
+    <div class="ans" id="aB"><b>B</b><p>Ese día teníamos el comedor lleno y ya avisamos de la espera. El arroz sale de cocina a su temperatura. Sentimos que no os gustara.</p><em id="tB"></em></div>
+    <div class="btns"><button type="button" class="pri" data-v="A">Es la A</button><button type="button" class="pri" data-v="B">Es la B</button></div>
+    <p class="out" id="res" aria-live="polite"></p>
+  </section>
+
+  <section class="how" aria-label="Cómo hacerlo">
+    <h2>Responde reseñas en 3 pasos</h2>
+    <p class="lead">Con ChatGPT, Claude o Gemini. Sirve para reseñas buenas y malas.</p>
+    <ol class="steps"><li><div class="dot">1</div><div class="t"><b>Pega el prompt y la reseña</b><span>Copia la reseña tal cual y, si quieres, una frase sobre qué pasó ese día.</span></div></li><li><div class="dot">2</div><div class="t"><b>Revisa los hechos</b><span>Que no diga nada que no sea verdad ni prometa nada que no vayas a dar.</span></div></li><li><div class="dot">3</div><div class="t"><b>Publícala tú</b><span>Ajusta lo que quieras y respóndela desde tu perfil de Google.</span></div></li></ol>
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt para responder reseñas</span><button class="copy" id="copy" type="button">Copiar prompt</button></div>
+      <pre id="prompt">Eres el dueño de [nombre del negocio]. Responde a esta reseña de Google.
+
+Reglas:
+1. Pide perdón sin excusas. No culpes al cliente, al día ni al personal.
+2. Menciona un detalle concreto de la reseña para que se note que la has leído.
+3. Invita a volver, sin presionar.
+4. No prometas descuentos, invitaciones ni compensaciones.
+5. No inventes hechos: si necesitas saber qué pasó, pregúntamelo antes de escribir.
+6. Entre 2 y 4 frases, tono cercano, sin emojis ni frases hechas («lamentamos las molestias ocasionadas»).
+
+Si la reseña es buena, da las gracias mencionando lo que le gustó.
+
+Reseña:
+[pega aquí la reseña]</pre>
+    </div>
+    <p class="warn"><b>Revísala antes de publicarla.</b> La respuesta va con tu nombre: comprueba que todo lo que dice es verdad y que suena a ti.</p>
+  </section>
+
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+<script>
+(function(){
+  Array.prototype.forEach.call(document.querySelectorAll('[data-v]'),function(b){b.addEventListener('click',function(){
+    document.getElementById('aA').classList.add('win');
+    document.getElementById('tA').textContent='ESCRITA POR LA IA CON EL PROMPT DE ABAJO';
+    document.getElementById('tB').textContent='LA TÍPICA RESPUESTA EN CALIENTE · EJEMPLO';
+    document.getElementById('res').innerHTML=(b.dataset.v==='A'?'<b>¡Acertaste!</b> ':'<b>Era la A.</b> ')+'Pide perdón sin excusas, menciona un detalle concreto e invita a volver.';
+  })});
+
+  var btn=document.getElementById('copy'), pre=document.getElementById('prompt');
+  function done(){btn.textContent='Copiado';btn.classList.add('ok');setTimeout(function(){btn.textContent='Copiar prompt';btn.classList.remove('ok')},2200)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selecciona y copia';setTimeout(function(){btn.textContent='Copiar prompt'},2600)}
+  btn.addEventListener('click',function(){var txt=pre.innerText;if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}});
+
+})();
+</script>
+</body>
+</html>

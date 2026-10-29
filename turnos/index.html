@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Prueba a comprobar un cuadrante y llévate el prompt para que la IA te proponga los turnos de la semana cumpliendo tus reglas.">
+<meta property="og:title" content="El cuadrante de turnos con IA">
+<meta property="og:description" content="Prueba a comprobar un cuadrante y llévate el prompt para que la IA te proponga los turnos de la semana cumpliendo tus reglas.">
+<title>El cuadrante de turnos con IA</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: página oscura de marca (marino + azul eléctrico): cabecera, demo que se puede tocar, 3 pasos, prompt y aviso. */
+
+:root{color-scheme:dark;--bg:#07101F;--panel:#0E1C36;--line:#1d3358;--ink:#F4F7FB;--mute:#9db0cc;--blue:#2F7BFF;--blue-soft:#7fb0ff;--orange:#FF7A1A;--red:#ff5a50;--green:#3ddc84;
+--fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;--fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+*,*::before,*::after{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px}
+.card{background:#f7f8fb;color:#0b1730;border-radius:18px;padding:16px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+label.f{display:flex;flex-direction:column;gap:5px;font:600 12px/1.2 var(--fb);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+input,textarea{font:500 16px/1.4 var(--fb);color:var(--ink);background:#0a1529;border:1px solid var(--line);border-radius:12px;padding:11px 12px;min-height:46px;width:100%}
+textarea{min-height:130px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btns button{font:600 14px/1 var(--fb);color:var(--ink);background:#132a52;border:1px solid var(--line);border-radius:999px;padding:11px 16px;min-height:44px;cursor:pointer}
+.btns .pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.btns button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.out{margin-top:14px;font-size:15px;color:var(--mute)}.out b{color:var(--ink)}
+.big{font:800 clamp(30px,9vw,44px)/1 var(--fd);color:var(--ink)}
+.tagd{font:600 11px/1 var(--fb);letter-spacing:.1em;color:var(--orange)}
+.hint{color:var(--mute);font-size:14px;margin:14px 2px 0}
+.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}.how .lead{margin-top:10px}
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}.steps span{color:var(--mute);font-size:14.5px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy.ok{background:#1f9d62}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}.warn b{color:var(--orange)}
+.sig{color:var(--mute);font-size:13px;text-align:center}.sig b{color:var(--ink)}
+table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+th,td{padding:6px 4px;border-bottom:1px solid #e3e8f0;text-align:right}th:first-child,td:first-child{text-align:left}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#5b6475}
+tr.bad td{background:#ffecea;color:#b4231b;font-weight:700}tr.ok td:last-child{color:#14a35a;font-weight:700}
+.k{display:inline-block;min-width:22px;padding:2px 0;border-radius:6px;text-align:center;font-weight:700}.kM{background:#d6e4ff}.kT{background:#ffe1c7}.kV{background:#d3f2e1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · TURNOS</div>
+    <h1>El cuadrante, <em>y comprobado</em></h1>
+    <p class="lead">Así queda un cuadrante propuesto por la IA. Toca «Comprobar»: ese paso es el que importa.</p>
+  </header>
+
+  <section aria-label="Demo">
+    <div class="card" style="overflow-x:auto">
+      <table id="tb"><thead><tr><th>Equipo</th><th>L</th><th>M</th><th>X</th><th>J</th><th>V</th><th>S</th><th>D</th><th>Horas</th></tr></thead><tbody></tbody></table>
+      <p class="tagd" style="margin:10px 0 0">DEMO · DATOS FICTICIOS · TURNOS DE 8 H</p>
+    </div>
+    <div class="btns"><button class="pri" type="button" id="chk">Comprobar</button><button type="button" id="fixb" hidden>Corregir</button></div>
+    <p class="out" id="res" aria-live="polite">M = mañana · T = tarde · – = libre · V = vacaciones</p>
+  </section>
+
+  <section class="how" aria-label="Cómo hacerlo">
+    <h2>Hazlo en 3 pasos</h2>
+    <p class="lead">Con ChatGPT, Claude o Gemini. Cuantas más reglas le des, mejor cuadrante te propone.</p>
+    <ol class="steps"><li><div class="dot">1</div><div class="t"><b>Escribe tus reglas</b><span>Horas de contrato de cada persona, descansos, vacaciones, peticiones y cuántos necesitas en cada turno.</span></div></li><li><div class="dot">2</div><div class="t"><b>Pega el prompt</b><span>Te propone el cuadrante en una tabla y una comprobación final, persona por persona.</span></div></li><li><div class="dot">3</div><div class="t"><b>Revísalo tú</b><span>Mira la tabla de comprobación y corrige lo que no cuadre antes de colgarlo.</span></div></li></ol>
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt del cuadrante de turnos</span><button class="copy" id="copy" type="button">Copiar prompt</button></div>
+      <pre id="prompt">Hazme el cuadrante de turnos de la semana del [fecha] para mi [tipo de negocio].
+
+Turnos: [por ejemplo: Mañana 8-16 h, Tarde 16-24 h]
+Equipo y horas máximas de cada persona (las de su contrato o convenio):
+- [Nombre]: [horas] h/semana
+- ...
+
+Reglas:
+- Nadie pasa de sus horas máximas.
+- Descansos: [los que marque tu convenio, por ejemplo días libres por semana y horas entre turnos].
+- Vacaciones y peticiones: [Ana de vacaciones de lunes a miércoles, Luis no puede domingos…]
+- Mínimos por turno: [por ejemplo, 3 personas en sala el sábado por la tarde].
+
+Devuélveme:
+1. Una tabla: filas = personas, columnas = días, con M, T, Libre o Vacaciones.
+2. Una tabla de comprobación: horas de cada persona frente a su máximo, días de descanso y si se cumplen los mínimos de cada turno. Marca con ❌ cualquier regla que no se cumpla y propón cómo arreglarla.
+Si una regla no se puede cumplir, dímelo; no la ignores.</pre>
+    </div>
+    <p class="warn"><b>Las reglas legales las pone tu convenio, no la IA.</b> Usa las horas y descansos que marque tu convenio o tu asesoría, y revisa el cuadrante antes de publicarlo.</p>
+  </section>
+
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+<script>
+(function(){
+  var EQ=[['Ana','VVVMM--',40],['Luis','MTT-MM-',40],['Marta','TT--TTT',32],['Pablo','M-MMTM-',40],['Sara','TM-T--M',32],['Javi','--T-TT-',32]];
+  var tb=document.querySelector('#tb tbody');
+  function h(s){return (s.match(/[MT]/g)||[]).length*8}
+  function pinta(){tb.innerHTML=EQ.map(function(r){return '<tr><td>'+r[0]+'</td>'+r[1].split('').map(function(c){return '<td><span class="k k'+c+'">'+c+'</span></td>'}).join('')+'<td>'+h(r[1])+' / '+r[2]+'</td></tr>'}).join('')}
+  pinta();
+  document.getElementById('chk').addEventListener('click',function(){
+    var malas=[];Array.prototype.forEach.call(tb.rows,function(tr,i){var r=EQ[i],ok=h(r[1])<=r[2]&&r[1].indexOf('-')>=0;tr.className=ok?'ok':'bad';if(!ok)malas.push(r[0])});
+    document.getElementById('res').innerHTML=malas.length?'<b>'+malas.join(', ')+'</b> pasa de sus horas de contrato (40 / 32 h). Toca «Corregir».':'<b>Todo cuadra:</b> nadie pasa de sus horas y todos tienen descanso.';
+    document.getElementById('fixb').hidden=!malas.length;
+  });
+  document.getElementById('fixb').addEventListener('click',function(){EQ[2][1]='TT--TT-';EQ[5][1]='--T-TTT';pinta();document.getElementById('chk').click();
+    document.getElementById('res').innerHTML+=' El domingo de Marta pasa a Javi.'});
+
+  var btn=document.getElementById('copy'), pre=document.getElementById('prompt');
+  function done(){btn.textContent='Copiado';btn.classList.add('ok');setTimeout(function(){btn.textContent='Copiar prompt';btn.classList.remove('ok')},2200)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selecciona y copia';setTimeout(function(){btn.textContent='Copiar prompt'},2600)}
+  btn.addEventListener('click',function(){var txt=pre.innerText;if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}});
+
+})();
+</script>
+</body>
+</html>
