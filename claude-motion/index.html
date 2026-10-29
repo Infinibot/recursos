@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Cambia los números de un bar de ejemplo y mira cómo cambia su historia. Con el prompt para hacer la tuya con Claude Motion.">
+<meta property="og:title" content="Tus números del mes, en vídeo">
+<meta property="og:description" content="El prompt para convertir tus ventas del mes en una historia de Instagram con Claude Motion.">
+<title>Tus números del mes, en vídeo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: página oscura de marca (marino + azul eléctrico) con una historia de Instagram de ejemplo que cambia al tocar las cifras. */
+:root{
+  color-scheme:dark;
+  --bg:#07101F; --panel:#0E1C36; --line:#1d3358; --ink:#F4F7FB; --mute:#9db0cc;
+  --blue:#2F7BFF; --blue-soft:#7fb0ff; --orange:#FF7A1A;
+  --fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}
+h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+
+/* demo: cifras editables + historia */
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.inputs{display:flex;flex-direction:column;gap:10px}
+.inputs label{display:flex;flex-direction:column;gap:5px;font:600 12px/1 var(--fb);letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.inputs input{font:600 17px/1 var(--fb);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px;min-height:46px;width:100%;font-variant-numeric:tabular-nums}
+.inputs input:focus{border-color:var(--blue);outline:none}
+.story{position:relative;aspect-ratio:9/16;border-radius:22px;overflow:hidden;border:2px solid #2b3242;
+  background:linear-gradient(170deg,#0d2152,#07101F 62%);box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.story .sb{position:absolute;left:10px;right:10px;top:9px;display:flex;gap:4px}
+.story .sb i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.35)}
+.story .sb i:first-child{background:#fff}
+.story .k{position:absolute;left:14px;top:30px;font:800 9px/1 var(--fb);letter-spacing:.16em;color:#8fb8ff}
+.story .n{position:absolute;left:14px;top:42px;font:800 20px/1 var(--fd)}
+.chart{position:absolute;left:12px;right:12px;top:72px;height:40%;display:flex;gap:5px;align-items:flex-end}
+.col{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;height:100%;justify-content:flex-end}
+.col .v{font:700 8px/1 var(--fb);white-space:nowrap;letter-spacing:-.02em}
+.col .b{width:100%;border-radius:5px 5px 2px 2px;background:linear-gradient(#6aa5ff,#2F7BFF);transition:height .45s cubic-bezier(.16,1,.3,1)}
+.col .w{font:700 8px/1 var(--fb);color:#8d97ad}
+.big{position:absolute;left:14px;bottom:32px}
+.big b{display:block;font:800 clamp(24px,7vw,32px)/1 var(--fd)}
+.big span{font:600 9px/1 var(--fb);color:#9aa6bd}
+.tagd{position:absolute;left:14px;bottom:12px;font:600 8px/1 var(--fb);letter-spacing:.1em;color:var(--orange)}
+.hint{color:var(--mute);font-size:14px;margin:14px 2px 0}
+
+/* sección del prompt */
+.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}
+.how .lead{margin-top:10px}
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}
+.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.steps span{color:var(--mute);font-size:14.5px}
+.steps code{font:600 14px/1 ui-monospace,Menlo,Consolas,monospace;color:var(--ink);background:#132a52;border-radius:6px;padding:2px 6px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy:hover{filter:brightness(1.1)}
+.copy.ok{background:#1f9d62}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}
+.warn b{color:var(--orange)}
+.sig{color:var(--mute);font-size:13px;text-align:center}
+.sig b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.col .b{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · MOTION</div>
+    <h1>Cambia una cifra. <em>Mira la historia cambiar.</em></h1>
+    <p class="lead">Estas son las ventas de octubre de un bar de ejemplo, como las convierte Claude Motion en una historia de Instagram. Toca las cifras. Debajo tienes el prompt para hacer la tuya.</p>
+  </header>
+
+  <section aria-label="Demo de la historia">
+    <div class="demo-grid">
+      <div class="inputs" id="inputs"></div>
+      <div class="story" aria-label="Vista previa de la historia" role="img">
+        <div class="sb"><i></i><i></i><i></i></div>
+        <div class="k">VENTAS DE OCTUBRE</div><div class="n">Bar Lucero</div>
+        <div class="chart" id="chart"></div>
+        <div class="big"><b id="big"></b><span>última semana</span></div>
+        <div class="tagd">DEMO · DATOS FICTICIOS</div>
+      </div>
+    </div>
+    <p class="hint">Así de fácil es corregirla: en Claude basta con escribir «Cambia 2.950 € por 3.120 €».</p>
+  </section>
+
+  <section class="how" aria-label="Cómo hacer la tuya">
+    <h2>Haz la tuya en 3 pasos</h2>
+    <p class="lead">Sin editar vídeo. Claude Motion te devuelve un MP4 vertical con tus números, listo para tus historias.</p>
+    <ol class="steps">
+      <li><div class="dot">1</div><div class="t"><b>Copia el prompt</b><span>Es el de abajo. Cambia solo lo que va entre corchetes: tu negocio y tus datos reales.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>Abre Claude y escribe <code>/motion</code></b><span>Elige la opción Motion y pega el prompt. Está en los planes Team y Enterprise.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>Revisa, corrige y descarga</b><span>Comprueba cada cifra, pide los cambios que quieras y descárgalo en MP4.</span></div></li>
+    </ol>
+
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt para Claude Motion</span><button class="copy" id="copy" type="button">Copiar prompt</button></div>
+      <pre id="prompt">Crea una animación vertical (9:16) de 20 segundos para las historias de Instagram de mi negocio.
+
+QUIÉN LA VE: mis clientes [o: mi equipo]. La verán en el móvil, casi siempre sin sonido.
+
+MI NEGOCIO
+- Nombre: [nombre]
+- Color principal: [por ejemplo azul #2F7BFF o "verde oliva"]
+
+MIS DATOS DEL MES (usa SOLO estos; no inventes ni redondees ninguno)
+- Ventas por semana: [S1 …, S2 …, S3 …, S4 …]
+- Lo más vendido: [producto o plato y cuántas unidades]
+- Reseñas: [nota en Google y reseñas nuevas del mes]
+[Añade o quita los datos que quieras enseñar]
+
+CÓMO LA QUIERO
+1. Una idea por escena: 4 o 5 escenas de 3 a 5 segundos.
+2. Textos grandes y cortos (máximo 8 palabras por escena), que se lean de un vistazo en el móvil.
+3. Las cifras suben con un contador y las barras de las semanas crecen una a una.
+4. Deja libres la franja de arriba y la de abajo de la pantalla, que en Instagram las tapan el nombre y la caja de respuesta.
+5. Termina con "Gracias por venir en [mes]" y el nombre del negocio.
+
+AL TERMINAR
+Dime qué cifra aparece en cada escena para que pueda comprobarlas antes de descargarla.</pre>
+    </div>
+
+    <p class="warn"><b>Revisa cada cifra antes de publicar.</b> Claude anima lo que le das, pero puede equivocarse al copiar un número. Si algo no cuadra, pídele «Cambia X por Y». Claude Motion está en beta y solo en los planes Team y Enterprise.</p>
+  </section>
+
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+
+<script>
+(function(){
+  var W=[1840,2110,2460,2950], inputs=document.getElementById('inputs'), chart=document.getElementById('chart'), big=document.getElementById('big');
+  function eur(v){return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')+' €'}
+  W.forEach(function(v,i){
+    var l=document.createElement('label'); l.textContent='Semana '+(i+1);
+    var inp=document.createElement('input'); inp.type='number'; inp.inputMode='numeric'; inp.min='0'; inp.step='10'; inp.value=v; inp.id='s'+i;
+    inp.addEventListener('input',function(){var n=parseFloat(inp.value);W[i]=isFinite(n)&&n>=0?n:0;paint()});
+    l.appendChild(inp); inputs.appendChild(l);
+    chart.insertAdjacentHTML('beforeend','<div class="col"><span class="v" id="v'+i+'"></span><div class="b" id="b'+i+'"></div><span class="w">S'+(i+1)+'</span></div>');
+  });
+  function paint(){
+    var max=Math.max.apply(null,W.concat([1]));
+    W.forEach(function(v,i){
+      document.getElementById('b'+i).style.height=Math.max(2,v/max*82)+'%';
+      document.getElementById('v'+i).textContent=eur(v);
+    });
+    big.textContent=eur(W[3]);
+  }
+  paint();
+
+  var btn=document.getElementById('copy'), pre=document.getElementById('prompt');
+  function done(){btn.textContent='Copiado';btn.classList.add('ok');setTimeout(function(){btn.textContent='Copiar prompt';btn.classList.remove('ok')},2200)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selecciona y copia';setTimeout(function(){btn.textContent='Copiar prompt'},2600)}
+  btn.addEventListener('click',function(){
+    var txt=pre.innerText;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}
+  });
+})();
+</script>
+</body>
+</html>
