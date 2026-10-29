@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Calcula cuánto podrías estar pagando de más en la luz y llévate el prompt para que la IA te explique tu factura.">
+<meta property="og:title" content="Audita tu factura de la luz">
+<meta property="og:description" content="Calcula cuánto podrías estar pagando de más en la luz y llévate el prompt para que la IA te explique tu factura.">
+<title>Audita tu factura de la luz</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: página oscura de marca (marino + azul eléctrico): cabecera, demo que se puede tocar, 3 pasos, prompt y aviso. */
+
+:root{color-scheme:dark;--bg:#07101F;--panel:#0E1C36;--line:#1d3358;--ink:#F4F7FB;--mute:#9db0cc;--blue:#2F7BFF;--blue-soft:#7fb0ff;--orange:#FF7A1A;--red:#ff5a50;--green:#3ddc84;
+--fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;--fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif}
+*,*::before,*::after{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px}
+.card{background:#f7f8fb;color:#0b1730;border-radius:18px;padding:16px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+label.f{display:flex;flex-direction:column;gap:5px;font:600 12px/1.2 var(--fb);letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+input,textarea{font:500 16px/1.4 var(--fb);color:var(--ink);background:#0a1529;border:1px solid var(--line);border-radius:12px;padding:11px 12px;min-height:46px;width:100%}
+textarea{min-height:130px;resize:vertical}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.btns button{font:600 14px/1 var(--fb);color:var(--ink);background:#132a52;border:1px solid var(--line);border-radius:999px;padding:11px 16px;min-height:44px;cursor:pointer}
+.btns .pri{background:var(--blue);border-color:var(--blue);color:#fff}
+.btns button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.out{margin-top:14px;font-size:15px;color:var(--mute)}.out b{color:var(--ink)}
+.big{font:800 clamp(30px,9vw,44px)/1 var(--fd);color:var(--ink)}
+.tagd{font:600 11px/1 var(--fb);letter-spacing:.1em;color:var(--orange)}
+.hint{color:var(--mute);font-size:14px;margin:14px 2px 0}
+.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}.how .lead{margin-top:10px}
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}.steps span{color:var(--mute);font-size:14.5px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy.ok{background:#1f9d62}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}.warn b{color:var(--orange)}
+.sig{color:var(--mute);font-size:13px;text-align:center}.sig b{color:var(--ink)}
+table{width:100%;border-collapse:collapse;font-size:12px;font-variant-numeric:tabular-nums}
+th,td{padding:6px 4px;border-bottom:1px solid #e3e8f0;text-align:right}th:first-child,td:first-child{text-align:left}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#5b6475}
+tr.bad td{background:#ffecea;color:#b4231b;font-weight:700}tr.ok td:last-child{color:#14a35a;font-weight:700}
+.grid2 label:last-child{grid-column:1/-1}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · LUZ</div>
+    <h1>¿Cuánto pagas <em>de más</em> en la luz?</h1>
+    <p class="lead">Mete tus datos (están en tu factura) y mira una estimación rápida de lo que podrías ahorrar. Es orientativa: sirve para saber dónde mirar, no para decidir.</p>
+  </header>
+
+  <section aria-label="Demo">
+    <div class="box">
+      <div class="grid2">
+        <label class="f">Potencia contratada (kW)<input id="pc" type="number" step="0.05" value="5.75" inputmode="decimal"></label>
+        <label class="f">Potencia máx. que usas (kW)<input id="pu" type="number" step="0.05" value="3.1" inputmode="decimal"></label>
+        <label class="f">Precio potencia (€/kW·día)<input id="pp" type="number" step="0.001" value="0.1043" inputmode="decimal"></label>
+        <label class="f">Servicios extra (€/mes)<input id="se" type="number" step="0.01" value="6.95" inputmode="decimal"></label>
+        <label class="f">Tu precio energía (€/kWh)<input id="pe" type="number" step="0.001" value="0.165" inputmode="decimal"></label>
+        <label class="f">Precio de otra oferta (€/kWh)<input id="po" type="number" step="0.001" value="0.135" inputmode="decimal"></label>
+        <label class="f">Consumo al año (kWh)<input id="ca" type="number" step="50" value="3000" inputmode="numeric"></label>
+      </div>
+      <p class="out">Ahorro estimado al año (sin impuestos): <span class="big" id="tot">0 €</span></p>
+      <p class="out" id="det"></p>
+      <p class="tagd">DATOS DE EJEMPLO · CÁMBIALOS POR LOS TUYOS</p>
+    </div>
+    <p class="hint">Bajar la potencia contratada demasiado puede hacer que salte el automático: deja margen sobre la potencia máxima que usas.</p>
+  </section>
+
+  <section class="how" aria-label="Cómo hacerlo">
+    <h2>Audita tu factura en 3 pasos</h2>
+    <p class="lead">Funciona con ChatGPT, Claude o Gemini. La IA te explica cada concepto; las decisiones las tomas tú después de comprobarlas.</p>
+    <ol class="steps"><li><div class="dot">1</div><div class="t"><b>Tapa tus datos</b><span>Antes de subir la factura, tapa nombre, DNI, dirección, IBAN y CUPS (vale una foto con esas partes tapadas).</span></div></li><li><div class="dot">2</div><div class="t"><b>Que te explique cada concepto</b><span>Pega el prompt y adjunta la factura. Te dirá qué es cada línea y cuánto pesa.</span></div></li><li><div class="dot">3</div><div class="t"><b>Pídele el plan de ahorro</b><span>El prompt ya lo incluye: acciones ordenadas por ahorro y qué comprobar antes de cada una.</span></div></li></ol>
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt de auditoría</span><button class="copy" id="copy" type="button">Copiar prompt</button></div>
+      <pre id="prompt">Te adjunto mi factura de la luz (he tapado mis datos personales). Quiero entenderla y saber si pago de más.
+
+1. EXPLÍCAMELA: para cada concepto de la factura, dime en una frase qué es y cuánto pago por él.
+2. POTENCIA: dime qué potencia tengo contratada y, si aparece, la potencia máxima que he usado. Si hay mucha diferencia, dímelo.
+3. SERVICIOS EXTRA: lista cualquier servicio o cargo que no sea obligatorio (mantenimiento, seguros, asistencia…).
+4. PRECIO: dime cuánto pago por kWh de energía y por kW de potencia. No me recomiendes ninguna comercializadora concreta.
+5. PLAN DE AHORRO: dame como máximo 3 acciones ordenadas de más a menos ahorro estimado al año, y para cada una qué debo comprobar antes (permanencias, penalizaciones, si me puede saltar el automático…).
+
+Reglas: no inventes datos que no estén en la factura; si algo no se lee o no está, dilo. Usa cifras sin impuestos y dime que son estimaciones.</pre>
+    </div>
+    <p class="warn"><b>Es una pista, no un veredicto.</b> Antes de cambiar nada, compruébalo con tu comercializadora y en el comparador oficial de ofertas de la CNMC. Y nunca subas la factura sin tapar tus datos personales.</p>
+  </section>
+
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+<script>
+(function(){
+  var ids=['pc','pu','pp','se','pe','po','ca'];
+  function v(i){var n=parseFloat(document.getElementById(i).value);return isFinite(n)&&n>0?n:0}
+  function eur(n){return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,'.')+' €'}
+  function calc(){
+    var margen=Math.max(0,v('pc')-Math.ceil(v('pu')*1.1*20)/20), pot=margen*v('pp')*365, ser=v('se')*12, ene=Math.max(0,(v('pe')-v('po'))*v('ca'));
+    document.getElementById('tot').textContent=eur(pot+ser+ene);
+    document.getElementById('det').innerHTML='Potencia de más: <b>'+eur(pot)+'</b> · Servicios extra: <b>'+eur(ser)+'</b> · Tarifa: <b>'+eur(ene)+'</b>';
+  }
+  ids.forEach(function(i){document.getElementById(i).addEventListener('input',calc)}); calc();
+
+  var btn=document.getElementById('copy'), pre=document.getElementById('prompt');
+  function done(){btn.textContent='Copiado';btn.classList.add('ok');setTimeout(function(){btn.textContent='Copiar prompt';btn.classList.remove('ok')},2200)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selecciona y copia';setTimeout(function(){btn.textContent='Copiar prompt'},2600)}
+  btn.addEventListener('click',function(){var txt=pre.innerText;if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}});
+
+})();
+</script>
+</body>
+</html>
