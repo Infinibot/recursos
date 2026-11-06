@@ -1,0 +1,173 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Una cafetera interactiva hecha con la skill Anatomy de Claude, con cómo instalarla y prompts para empezar.">
+<meta property="og:title" content="Anatomy: una frase, un dibujo que explica cómo funciona algo">
+<meta property="og:description" content="Desliza y mira la cafetera preparar un espresso. Con cómo instalar Anatomy y prompts para empezar.">
+<title>Anatomy · una frase, un dibujo</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: página oscura de marca (marino + azul eléctrico) con una carta clara de papel en el centro, como la de una mesa. */
+:root{
+  color-scheme:dark;
+  --bg:#07101F; --panel:#0E1C36; --line:#1d3358; --ink:#F4F7FB; --mute:#9db0cc;
+  --blue:#2F7BFF; --blue-soft:#7fb0ff; --orange:#FF7A1A;
+  --paper:#F4F7FB; --paper-ink:#0b1730; --paper-mute:#566680; --paper-line:#cfd9e8;
+  --fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}
+h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+
+/* selector de idioma */
+.langs{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.langs button{font:600 14px/1 var(--fb);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:11px 16px;min-height:44px;cursor:pointer;transition:background .15s,border-color .15s}
+.langs button:hover{border-color:var(--blue)}
+.langs button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+
+/* la carta */
+.menu{background:var(--paper);color:var(--paper-ink);border-radius:18px;padding:28px 22px 22px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.menu-head{text-align:center;padding-bottom:18px;border-bottom:2px solid var(--paper-ink)}
+.menu-head .n{font:800 30px/1 var(--fd);letter-spacing:-.01em}
+.menu-head .s{font:600 11px/1 var(--fb);letter-spacing:.2em;text-transform:uppercase;color:var(--paper-mute);margin-top:9px}
+.sec{margin-top:24px}
+.sec h3{font:700 12px/1 var(--fb);letter-spacing:.18em;text-transform:uppercase;color:var(--blue);padding-bottom:9px;border-bottom:1px solid var(--paper-line)}
+.dish{padding:14px 0;border-bottom:1px solid var(--paper-line)}
+.dish:last-child{border-bottom:0;padding-bottom:0}
+.row{display:flex;align-items:baseline;gap:8px}
+.row .nm{font:700 17px/1.25 var(--fd);min-width:0;overflow-wrap:anywhere}
+.row .dots{flex:1;border-bottom:2px dotted var(--paper-line);transform:translateY(-4px);min-width:12px}
+.row .pr{font:700 16px/1 var(--fb);font-variant-numeric:tabular-nums;white-space:nowrap}
+.dish p{margin:5px 0 0;font-size:14px;line-height:1.45;color:var(--paper-mute)}
+.alg{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}
+.alg span{font:600 11px/1 var(--fb);letter-spacing:.03em;color:#0b3a8a;background:#e1ebfd;border-radius:6px;padding:5px 8px}
+.foot{margin-top:22px;padding-top:14px;border-top:2px solid var(--paper-ink);font-size:13px;color:var(--paper-mute);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.foot b{color:var(--paper-ink);font-weight:600}
+.demo{font:600 11px/1 var(--fb);letter-spacing:.1em;color:var(--orange)}
+#menuBody{transition:opacity .16s}
+#menuBody.out{opacity:0}
+.hint{color:var(--mute);font-size:14px;margin:14px 2px 0}
+
+/* sección del prompt */
+.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}
+.how .lead{margin-top:10px}
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}
+.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.steps span{color:var(--mute);font-size:14.5px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy:hover{filter:brightness(1.1)}
+.copy.ok{background:#1f9d62}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}
+.warn b{color:var(--orange)}
+.sig{color:var(--mute);font-size:13px;text-align:center}
+.sig b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){#menuBody,.langs button{transition:none}}
+</style>
+<style>
+.frame{border:1px solid var(--line);border-radius:18px;overflow:hidden;background:#111;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.frame iframe{display:block;width:100%;height:600px;border:0;background:#111}
+.cmd{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pbs{display:flex;flex-direction:column;gap:18px;margin-top:22px}
+.promptbox{margin-top:0}
+.pb-bar b{font:700 15px/1.2 var(--fd);color:var(--ink);letter-spacing:0;text-transform:none}
+.tips{margin:18px 0 0;padding:0 0 0 18px;color:var(--mute);font-size:14.5px;display:flex;flex-direction:column;gap:8px}
+.tips b{color:var(--ink)}
+.src{color:var(--mute);font-size:13px;text-align:center}
+.src a{color:var(--blue-soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · ANATOMY</div>
+    <h1>Una frase. <em>Un dibujo que explica cómo funciona.</em></h1>
+    <p class="lead">Esta cafetera la ha hecho la skill Anatomy de Claude a partir de una sola frase. Desliza el dedo por encima y mira cómo prepara un espresso. Debajo, cómo instalarla y prompts para empezar.</p>
+  </header>
+
+  <section aria-label="Demo: cafetera interactiva">
+    <div class="frame"><iframe src="cafetera.html" title="Cafetera de espresso interactiva, hecha con Anatomy" loading="lazy"></iframe></div>
+    <p class="hint">DEMO · DATOS FICTICIOS · el tiempo va acelerado: un espresso real tarda unos 28 segundos.</p>
+  </section>
+
+  <section class="how" aria-label="Cómo instalarla">
+    <h2>Instálala en 3 pasos</h2>
+    <p class="lead">Anatomy es una skill de código abierto (licencia MIT). Funciona dentro de Claude Code, la herramienta de Claude para el ordenador, y necesita tener Node.js instalado.</p>
+    <ol class="steps">
+      <li><div class="dot">1</div><div class="t"><b>Abre la terminal y pega esta línea</b><span>Instala la skill en tu Claude Code, para todos tus proyectos.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>Abre Claude Code</b><span>En la carpeta donde quieras guardar el dibujo.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>Escribe /anatomy y tu frase</b><span>Por ejemplo, uno de los prompts de más abajo. Claude trabaja solo y te deja una página que abres en el navegador.</span></div></li>
+    </ol>
+    <div class="cmd">
+      <div class="pb-bar"><span>Instalación</span><button class="copy" type="button" data-copy="inst">Copiar</button></div>
+      <pre id="inst">npx skills add wheresryan22/anatomy -g -a claude-code</pre>
+    </div>
+  </section>
+
+  <section class="how" aria-label="Prompts para empezar">
+    <h2>Prompts para empezar</h2>
+    <p class="lead">Cambia solo lo que va entre corchetes. Escríbelos en Claude Code, empezando por /anatomy.</p>
+    <div class="pbs">
+      <div class="promptbox">
+        <div class="pb-bar"><b>1 · La cafetera de la demo</b><button class="copy" type="button" data-copy="p0">Copiar</button></div>
+        <pre id="p0">/anatomy explica cómo funciona por dentro una cafetera de espresso, interactivo. Guárdalo como una página HTML que se abra en el navegador y con los textos en español.</pre>
+      </div>
+      <div class="promptbox">
+        <div class="pb-bar"><b>2 · Tu producto</b><button class="copy" type="button" data-copy="p1">Copiar</button></div>
+        <pre id="p1">/anatomy explica cómo funciona por dentro [tu producto: por ejemplo una máquina de coser, una bicicleta eléctrica, un horno de pan], interactivo. Que se pueda mover con el ratón y separar por piezas para ver cada una, con textos cortos en español y pocas piezas bien explicadas.</pre>
+      </div>
+      <div class="promptbox">
+        <div class="pb-bar"><b>3 · Para un cliente que no sabe del tema</b><button class="copy" type="button" data-copy="p2">Copiar</button></div>
+        <pre id="p2">/anatomy dibuja cómo funciona [mi producto] para explicárselo a un cliente que no sabe nada de [el tema]. Tono claro, sin tecnicismos, textos cortos en español. Dime qué has simplificado.</pre>
+      </div>
+      <div class="promptbox">
+        <div class="pb-bar"><b>4 · Para ponerlo en tu web</b><button class="copy" type="button" data-copy="p3">Copiar</button></div>
+        <pre id="p3">Ahora ponlo en una sola página HTML que pueda copiar a mi web, con un título arriba y dos líneas de texto debajo. Explícame en tres pasos cómo subirla.</pre>
+      </div>
+      <div class="promptbox">
+        <div class="pb-bar"><b>5 · Para revisar lo que ha hecho</b><button class="copy" type="button" data-copy="p4">Copiar</button></div>
+        <pre id="p4">Repasa la figura que acabas de hacer: ¿qué piezas o datos has inventado o simplificado? Dame una lista de lo que debo comprobar yo antes de enseñársela a un cliente.</pre>
+      </div>
+    </div>
+    <ul class="tips">
+      <li><b>Mejor con objetos físicos.</b> La skill está pensada para convertir una idea en una máquina o un instrumento. Con cosas que se tocan funciona mejor que con listas o diagramas de flujo.</li>
+      <li><b>Tarda un rato.</b> Una figura sencilla puede llevarle a Claude desde varios minutos hasta cerca de una hora, según lo complicada que sea. Déjalo trabajar.</li>
+      <li><b>Pídele que se pueda abrir.</b> Si quieres verlo pieza a pieza, díselo en la frase: «que se pueda separar por piezas».</li>
+      <li><b>Pocas piezas, textos cortos.</b> Cuanto más concreto seas con lo que quieres enseñar, mejor sale.</li>
+    </ul>
+    <p class="warn"><b>Revísalo antes de enseñarlo a un cliente.</b> Es un dibujo hecho por IA: puede simplificar o inventar piezas. Comprueba que lo que cuenta es correcto para tu producto. Usa el prompt 5 para que Claude te diga qué debes mirar.</p>
+  </section>
+
+  <p class="src">Anatomy es de wheresryan22 · <a href="https://github.com/wheresryan22/anatomy" rel="noopener">github.com/wheresryan22/anatomy</a></p>
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+<script>
+document.addEventListener('click',function(ev){
+  var b=ev.target.closest('[data-copy]'); if(!b) return;
+  var t=document.getElementById(b.getAttribute('data-copy')).innerText.trim();
+  var done=function(){b.textContent='Copiado';b.classList.add('ok');setTimeout(function(){b.textContent='Copiar';b.classList.remove('ok')},1800)};
+  if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(done,function(){fallback(t,done)})}else{fallback(t,done)}
+  function fallback(text,cb){var a=document.createElement('textarea');a.value=text;a.style.position='fixed';a.style.opacity='0';document.body.appendChild(a);a.select();try{document.execCommand('copy');cb()}catch(e){}document.body.removeChild(a)}
+});
+</script>
+</body>
+</html>
