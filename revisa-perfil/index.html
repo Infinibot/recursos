@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Toca tres arreglos y mira cómo cambia la bio de un perfil de ejemplo. Con las 5 preguntas y el prompt para que la IA revise el tuyo.">
+<meta property="og:title" content="Revisa tu perfil de Instagram con IA">
+<meta property="og:description" content="Tres arreglos que se ven al tocar, 5 preguntas y el prompt para que Claude revise la captura de tu perfil.">
+<title>Revisa tu perfil de Instagram con IA</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: página oscura de marca (marino + azul eléctrico) con el perfil de ejemplo en el centro. */
+:root{
+  color-scheme:dark;
+  --bg:#07101F; --panel:#0E1C36; --line:#1d3358; --ink:#F4F7FB; --mute:#9db0cc;
+  --blue:#2F7BFF; --blue-soft:#7fb0ff; --orange:#FF7A1A; --red:#ff6b61; --green:#5fd9a0;
+  --fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}
+h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+
+/* el perfil de ejemplo (recreado) */
+.pf{background:#fbfaf6;color:#1b2333;border-radius:20px;padding:20px 18px 18px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.ph{display:flex;align-items:center;gap:14px}
+.av{flex:none;width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,#feda75,#d62976 55%,#4f5bd5);display:grid;place-items:center}
+.av span{display:grid;place-items:center;width:66px;height:66px;border-radius:50%;background:#fbfaf6;font:800 36px/1 var(--fd);color:#c2410c}
+.pn b{display:block;font:700 19px/1.2 var(--fb)}.pn span{display:block;font-size:14px;color:#566275}
+.bio{margin-top:14px;font-size:16px;line-height:1.35;font-weight:600}
+.ln,.lk,.btn{display:grid;padding:5px 6px;margin:0 -6px;border-radius:8px;transition:background-color .4s}
+.la,.lb{grid-area:1/1;transition:opacity .35s,transform .35s}
+.lb{opacity:0;transform:translateY(8px)}
+.on .la{opacity:0;transform:translateY(-8px)}.on .lb{opacity:1;transform:none}
+.ln.flash,.lk.flash{background-color:rgba(47,123,255,.22)}
+.lk{font-weight:800;color:#1f5fd6}
+.btn{margin:12px 0 0;padding:0;text-align:center;font-weight:800;font-size:16px;border-radius:10px;background:#2F7BFF;color:#fff;line-height:44px;height:44px}
+.rec{font:800 9px/1 var(--fb);letter-spacing:.14em;color:#7a6a58;text-align:right;margin-bottom:6px}
+.toggles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.toggles button{font:600 13.5px/1.25 var(--fb);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 8px;min-height:56px;cursor:pointer}
+.toggles button:hover{border-color:var(--blue)}
+.toggles button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.read{display:flex;gap:8px;margin-top:10px}
+.read div{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--mute)}
+.read b{display:block;font:800 18px/1.2 var(--fd);color:var(--ink);margin-top:2px}
+.read b.ok{color:var(--green)}.read b.bad{color:var(--red)}
+.reset{margin-top:10px;font:600 13px/1 var(--fb);color:var(--blue-soft);background:none;border:0;padding:12px 4px;min-height:44px;cursor:pointer;text-decoration:underline}
+.demo{font:600 11px/1 var(--fb);letter-spacing:.1em;color:var(--orange);margin-top:6px}
+.hint{color:var(--mute);font-size:14px;margin:12px 2px 0}
+
+/* las 5 preguntas */
+.qs h2,.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}
+.qlist{list-style:none;margin:20px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.qlist li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.qlist .t{min-width:0}
+.qlist b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.qlist span{color:var(--mute);font-size:14.5px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+
+/* sección del prompt */
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}
+.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.steps span{color:var(--mute);font-size:14.5px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy:hover{filter:brightness(1.1)}
+.copy.ok{background:#1f9d62}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}
+.warn b{color:var(--orange)}
+.sig{color:var(--mute);font-size:13px;text-align:center}
+.sig b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.la,.lb,.ln,.lk,.btn{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · PERFIL</div>
+    <h1>Toca tres arreglos. <em>Mira cómo cambia la bio.</em></h1>
+    <p class="lead">Este es el perfil de una tienda de ejemplo. Actívalos uno a uno: debajo tienes las 5 preguntas y el prompt para que Claude revise la captura del tuyo.</p>
+  </header>
+
+  <section aria-label="Demo del perfil">
+    <div class="pf" id="pf">
+      <div class="rec">PERFIL RECREADO · NEGOCIO FICTICIO</div>
+      <div class="ph"><div class="av"><span>T</span></div><div class="pn"><b>tienda.ejemplo</b><span>Tienda Ejemplo</span></div></div>
+      <div class="bio">
+        <div class="ln" id="ln1" data-g="1"><span class="la">✨ Creando momentos ✨</span><span class="lb">Regalos y cerámica hecha a mano</span></div>
+        <div class="ln" id="ln2" data-g="2"><span class="la">💫 Más que una tienda 💫</span><span class="lb">📍 Valencia · Envíos a toda España</span></div>
+        <div class="ln" data-g="3"><span class="la">DM para info 💌</span><span class="lb">👇 Haz tu pedido por WhatsApp</span></div>
+        <div class="lk" data-g="3"><span class="la">bit.ly/3xK9q</span><span class="lb">tiendaejemplo.es/pedidos</span></div>
+      </div>
+      <div class="btn" data-g="3"><span class="la">Seguir</span><span class="lb">Pedir ahora</span></div>
+    </div>
+    <div class="toggles" id="toggles" role="group" aria-label="Arreglos">
+      <button type="button" data-k="p" aria-pressed="false">1 · Qué vendes</button>
+      <button type="button" data-k="pr" aria-pressed="false">2 · Dónde estás</button>
+      <button type="button" data-k="l" aria-pressed="false">3 · Botón claro</button>
+    </div>
+    <div class="read" aria-live="polite">
+      <div>Datos que se entienden<b id="rCount" class="bad">0</b></div>
+      <div>Botón<b id="rPrice" class="bad">«Seguir»</b></div>
+    </div>
+    <button type="button" class="reset" id="reset">Volver al antes</button>
+    <div class="demo">DEMO · NEGOCIO FICTICIO</div>
+    <p class="hint">Es una ilustración: no promete resultados. Lo que cambia es lo que se entiende de un vistazo.</p>
+  </section>
+
+  <section class="qs" aria-label="Las cinco preguntas">
+    <h2>5 preguntas para tu perfil</h2>
+    <p class="lead">Míralo como lo vería alguien que llega por primera vez. Si dudas en alguna, ahí hay trabajo.</p>
+    <ol class="qlist">
+      <li><div class="dot">1</div><div class="t"><b>¿Se entiende qué vendes sin deslizar?</b><span>Lo primero que se lee es la primera línea de la bio. Ahí tiene que estar lo que haces.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>¿Dice dónde estás o a quién atiendes?</b><span>Una ciudad, una zona o un tipo de cliente. Sin eso, quien llega no sabe si eres para él.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>¿Hay un solo paso claro?</b><span>Reservar, pedir, escribir por WhatsApp. Un botón, no cuatro opciones.</span></div></li>
+      <li><div class="dot">4</div><div class="t"><b>¿El enlace lleva justo a ese paso?</b><span>Si pide algo, que el enlace abra eso y no una página genérica.</span></div></li>
+      <li><div class="dot">5</div><div class="t"><b>¿Cuentan lo mismo la foto, el nombre y la bio?</b><span>Nombre y foto también ayudan a entender el negocio de un vistazo.</span></div></li>
+    </ol>
+  </section>
+
+  <section class="how" aria-label="Revisión con IA">
+    <h2>Que la IA revise el tuyo</h2>
+    <p class="lead">Haz una captura de tu perfil y pídele a Claude que la revise con esas 5 preguntas.</p>
+    <ol class="steps">
+      <li><div class="dot">1</div><div class="t"><b>Haz una captura de tu perfil</b><span>La parte de arriba: foto, nombre, bio, enlace y botón. Tápate lo que no quieras enseñar.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>Copia el prompt y adjunta la captura</b><span>Cambia solo lo que va entre corchetes.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>Cámbialo tú y compara</b><span>Cambia la bio con los arreglos y haz otra captura. Compara tú mismo cuál se entiende mejor.</span></div></li>
+    </ol>
+
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt para tu perfil</span><button class="copy" id="copy" type="button">Copiar prompt</button></div>
+      <pre id="prompt">Eres un experto en perfiles de Instagram para negocios pequeños. Te adjunto una captura de mi perfil.
+
+MI NEGOCIO
+- Qué vendo: [tu negocio, por ejemplo "tienda de regalos"]
+- A quién quiero atraer: [por ejemplo "gente de mi ciudad"]
+- Qué quiero que haga quien llega: [escribirme por WhatsApp / reservar / pedir / llamar]
+
+REVISA LA CAPTURA CON ESTAS 5 PREGUNTAS
+1. ¿Se entiende qué vendo en la primera línea de la bio?
+2. ¿Dice dónde estoy o a quién atiendo?
+3. ¿Hay un solo paso claro para quien llega?
+4. ¿El enlace lleva justo a ese paso?
+5. ¿Cuentan lo mismo la foto, el nombre y la bio?
+
+RESPÓNDEME ASÍ
+- Una nota de 1 a 5 por pregunta, con una frase de por qué.
+- Tres versiones de la bio, cada una de 150 caracteres como máximo, que respondan a las preguntas en las que flojeo. Sin inventar datos: si te falta algo (ciudad, horario, precios), déjalo entre corchetes.
+- Qué debería poner en el botón y en el enlace.
+- Lo que NO puedas saber solo con la captura (cuánta gente llega, de dónde, qué hace) dímelo y no lo supongas.</pre>
+    </div>
+
+    <p class="warn"><b>Es una opinión, no un veredicto.</b> La IA puede equivocarse al valorar una captura. Lee la bio nueva como si fueras un cliente que no te conoce y decide con tu conocimiento de tus clientes.</p>
+  </section>
+
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+
+<script>
+(function(){
+  var S={p:false,pr:false,l:false}, G={p:'1',pr:'2',l:'3'};
+  function paint(){
+    Object.keys(G).forEach(function(k){
+      Array.prototype.forEach.call(document.querySelectorAll('[data-g="'+G[k]+'"]'),function(el){el.classList.toggle('on',S[k])});
+    });
+    var n=(S.p?1:0)+(S.pr?1:0)+(S.l?1:0);
+    var c=document.getElementById('rCount'), p=document.getElementById('rPrice');
+    c.textContent=String(n); c.className=n===3?'ok':'bad';
+    p.textContent=S.l?'«Pedir ahora»':'«Seguir»'; p.className=S.l?'ok':'bad';
+    Array.prototype.forEach.call(document.querySelectorAll('#toggles button'),function(b){b.setAttribute('aria-pressed',S[b.dataset.k]?'true':'false')});
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('#toggles button'),function(b){
+    b.addEventListener('click',function(){
+      S[b.dataset.k]=!S[b.dataset.k]; paint();
+      var ln=document.querySelector('[data-g="'+G[b.dataset.k]+'"]'); ln.classList.add('flash'); setTimeout(function(){ln.classList.remove('flash')},500);
+    });
+  });
+  document.getElementById('reset').addEventListener('click',function(){S={p:false,pr:false,l:false};paint()});
+  paint();
+
+  var btn=document.getElementById('copy'), pre=document.getElementById('prompt');
+  function done(){btn.textContent='Copiado';btn.classList.add('ok');setTimeout(function(){btn.textContent='Copiar prompt';btn.classList.remove('ok')},2200)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selecciona y copia';setTimeout(function(){btn.textContent='Copiar prompt'},2600)}
+  btn.addEventListener('click',function(){
+    var txt=pre.innerText;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}
+  });
+})();
+</script>
+</body>
+</html>
