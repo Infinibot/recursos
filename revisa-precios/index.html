@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Toca tres arreglos y mira cómo cambia una lista de precios de ejemplo sin tocar ningún precio. Con las 5 preguntas y el prompt para que la IA revise la tuya.">
+<meta property="og:title" content="Revisa tu lista de precios con IA">
+<meta property="og:description" content="Tres arreglos que se ven al tocar, 5 preguntas y el prompt para que Claude revise tu lista de precios.">
+<title>Revisa tu lista de precios con IA</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: página oscura de marca (marino + azul eléctrico) con la lista de precios de ejemplo en el centro. */
+:root{
+  color-scheme:dark;
+  --bg:#07101F; --panel:#0E1C36; --line:#1d3358; --ink:#F4F7FB; --mute:#9db0cc;
+  --blue:#2F7BFF; --blue-soft:#7fb0ff; --orange:#FF7A1A; --red:#ff6b61; --green:#5fd9a0;
+  --fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}
+h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+
+/* el perfil de ejemplo (recreado) */
+.pf{background:#fbfaf6;color:#1b2333;border-radius:20px;padding:20px 18px 18px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.ph{display:flex;align-items:center;gap:14px}
+.av{flex:none;width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,#feda75,#d62976 55%,#4f5bd5);display:grid;place-items:center}
+.av span{display:grid;place-items:center;width:66px;height:66px;border-radius:50%;background:#fbfaf6;font:800 36px/1 var(--fd);color:#c2410c}
+.pn b{display:block;font:700 19px/1.2 var(--fb)}.pn span{display:block;font-size:14px;color:#566275}
+.bio{margin-top:14px;font-size:16px;line-height:1.35;font-weight:600}
+.ln,.lk,.btn{display:grid;padding:5px 6px;margin:0 -6px;border-radius:8px;transition:background-color .4s}
+.la,.lb{grid-area:1/1;transition:opacity .35s,transform .35s}
+.lb{opacity:0;transform:translateY(8px)}
+.on .la{opacity:0;transform:translateY(-8px)}.on .lb{opacity:1;transform:none}
+.ln.flash,.lk.flash{background-color:rgba(47,123,255,.22)}
+.lk{font-weight:800;color:#1f5fd6}
+.btn{margin:12px 0 0;padding:0;text-align:center;font-weight:800;font-size:16px;border-radius:10px;background:#2F7BFF;color:#fff;line-height:44px;height:44px}
+.rec{font:800 9px/1 var(--fb);letter-spacing:.14em;color:#7a6a58;text-align:right;margin-bottom:6px}
+.lp{background:#fbfaf6;color:#1b2333;border-radius:20px;padding:16px 18px 12px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.lh{display:flex;align-items:baseline;justify-content:space-between;border-bottom:2px solid #1b2333;padding-bottom:8px}
+.lh b{font:800 22px/1 var(--fd)}.lh span{font:700 11px/1 var(--fb);letter-spacing:.18em;color:#566275}
+.lp .rec{font:800 9px/1 var(--fb);letter-spacing:.14em;color:#7a6a58;text-align:right;margin-bottom:6px}
+.row{margin:0 -8px;padding:6px 8px;border-radius:10px;border-bottom:1px solid #e3e1da;transition:background-color .4s,box-shadow .4s,opacity .4s}
+.top{display:flex;justify-content:space-between;align-items:baseline;gap:10px}
+.nm,.pc{display:grid}
+.la,.lb{grid-area:1/1;transition:opacity .35s,transform .35s}
+.lb{opacity:0;transform:translateY(6px)}
+.nm .la{font-size:13px;color:#6b7280;font-weight:500}.nm .lb{font-size:17px;font-weight:700}
+.pc{justify-items:end}
+.pc .la{font-size:12px;color:#6b7280}.pc .lb{font:800 22px/1 var(--fd);color:#1f5fd6}
+.inc{max-height:0;opacity:0;overflow:hidden;font-size:13px;color:#566275;transition:max-height .4s,opacity .4s}
+.on1 .nm .la,.on2 .pc .la{opacity:0}.on1 .nm .lb,.on2 .pc .lb{opacity:1;transform:none}
+.on1 .inc{max-height:24px;opacity:1}
+.dim .row:not(.hl){opacity:.6}
+.row.hl{background:rgba(47,123,255,.14);box-shadow:inset 0 0 0 2px #2F7BFF}
+.row .badge{display:none;font:800 10px/1 var(--fb);letter-spacing:.12em;color:#fff;background:#2F7BFF;border-radius:6px;padding:3px 8px;margin-left:8px;vertical-align:middle}
+.row.hl .badge{display:inline-block}
+.toggles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.toggles button{font:600 13.5px/1.25 var(--fb);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 8px;min-height:56px;cursor:pointer}
+.toggles button:hover{border-color:var(--blue)}
+.toggles button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.read{display:flex;gap:8px;margin-top:10px}
+.read div{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--mute)}
+.read b{display:block;font:800 18px/1.2 var(--fd);color:var(--ink);margin-top:2px}
+.read b.ok{color:var(--green)}.read b.bad{color:var(--red)}
+.reset{margin-top:10px;font:600 13px/1 var(--fb);color:var(--blue-soft);background:none;border:0;padding:12px 4px;min-height:44px;cursor:pointer;text-decoration:underline}
+.demo{font:600 11px/1 var(--fb);letter-spacing:.1em;color:var(--orange);margin-top:6px}
+.hint{color:var(--mute);font-size:14px;margin:12px 2px 0}
+
+/* las 5 preguntas */
+.qs h2,.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}
+.qlist{list-style:none;margin:20px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.qlist li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.qlist .t{min-width:0}
+.qlist b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.qlist span{color:var(--mute);font-size:14.5px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+
+/* sección del prompt */
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}
+.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.steps span{color:var(--mute);font-size:14.5px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy:hover{filter:brightness(1.1)}
+.copy.ok{background:#1f9d62}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}
+.warn b{color:var(--orange)}
+.sig{color:var(--mute);font-size:13px;text-align:center}
+.sig b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.la,.lb,.row,.inc{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · PRECIOS</div>
+    <h1>Toca tres arreglos. <em>Mira cómo cambia la lista.</em></h1>
+    <p class="lead">Esta es la lista de precios de una peluquería de ejemplo. Los precios no cambian: cambia cómo se presentan. Debajo tienes las 5 preguntas y el prompt para revisar la tuya.</p>
+  </header>
+
+  <section aria-label="Demo de la lista de precios">
+    <div class="lp" id="lp">
+      <div class="rec">LISTA RECREADA · NEGOCIO FICTICIO</div>
+      <div class="lh"><b>Salón Ejemplo</b><span>TARIFAS</span></div>
+      <div id="rows"><div class="row"><div class="top"><div class="nm"><span class="la">corte</span><span class="lb">Corte</span></div><div class="pc"><span class="la">15</span><span class="lb">15 €</span></div></div><div class="inc">Con secado</div></div><div class="row r2"><div class="top"><div class="nm"><span class="la">corte+lavado</span><span class="lb">Corte + lavado<i class="badge">RECOMENDADO</i></span></div><div class="pc"><span class="la">22€</span><span class="lb">22 €</span></div></div><div class="inc">Con lavado, secado y peinado</div></div><div class="row"><div class="top"><div class="nm"><span class="la">TINTE</span><span class="lb">Tinte</span></div><div class="pc"><span class="la">desde 35</span><span class="lb">desde 35 €</span></div></div><div class="inc">Según largo; te lo decimos antes</div></div><div class="row"><div class="top"><div class="nm"><span class="la">mechas</span><span class="lb">Mechas</span></div><div class="pc"><span class="la">60/90</span><span class="lb">60–90 €</span></div></div><div class="inc">Según largo y técnica</div></div></div>
+    </div>
+    <div class="toggles" id="toggles" role="group" aria-label="Arreglos">
+      <button type="button" data-k="p" aria-pressed="false">1 · Qué incluye</button>
+      <button type="button" data-k="pr" aria-pressed="false">2 · Precio grande</button>
+      <button type="button" data-k="l" aria-pressed="false">3 · Opción destacada</button>
+    </div>
+    <div class="read" aria-live="polite">
+      <div>Arreglos aplicados<b id="rCount" class="bad">0</b></div>
+      <div>Precios cambiados<b id="rPrice" class="ok">0</b></div>
+    </div>
+    <button type="button" class="reset" id="reset">Volver al antes</button>
+    <div class="demo">DEMO · NEGOCIO FICTICIO</div>
+    <p class="hint">Es una ilustración con datos ficticios. No promete resultados: los precios son los mismos, cambia lo que se entiende de un vistazo.</p>
+  </section>
+
+  <section class="qs" aria-label="Las cinco preguntas">
+    <h2>5 preguntas para tu lista de precios</h2>
+    <p class="lead">Míralo como lo vería alguien que la ve por primera vez. Si dudas en alguna, ahí hay trabajo.</p>
+    <ol class="qlist">
+      <li><div class="dot">1</div><div class="t"><b>¿Se entiende qué incluye cada precio?</b><span>Si hay que preguntar qué entra, ya hay una duda. Una línea bajo cada servicio basta.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>¿Se lee el precio de un vistazo?</b><span>El precio es lo que se busca primero. Tamaño legible y el mismo formato en todos (€, «desde», rangos).</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>¿Hay una opción que destaque?</b><span>Si todo pesa igual, es más difícil elegir. Marca la que quieres recomendar.</span></div></li>
+      <li><div class="dot">4</div><div class="t"><b>¿Aclara lo que puede cambiar el precio?</b><span>«Desde», «según largo»… di de qué depende para que nadie se lleve una sorpresa.</span></div></li>
+      <li><div class="dot">5</div><div class="t"><b>¿Dice qué hacer a continuación?</b><span>Reservar, llamar, escribir por WhatsApp. Un solo paso, visible al final de la lista.</span></div></li>
+    </ol>
+  </section>
+
+  <section class="how" aria-label="Revisión con IA">
+    <h2>Que la IA revise la tuya</h2>
+    <p class="lead">Haz una foto o captura de tu lista y pídele a Claude que la revise con esas 5 preguntas.</p>
+    <ol class="steps">
+      <li><div class="dot">1</div><div class="t"><b>Haz una foto o captura de tu lista</b><span>Tal como la ve el cliente: la carta de tarifas, el cartel o la página web.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>Copia el prompt y adjunta la imagen</b><span>Cambia solo lo que va entre corchetes.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>Cámbialo tú y compara</b><span>Rehaz la lista con los arreglos y compara tú mismo cuál se entiende mejor. Tú decides los precios.</span></div></li>
+    </ol>
+
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt para tu lista de precios</span><button class="copy" id="copy" type="button">Copiar prompt</button></div>
+      <pre id="prompt">Eres un experto en presentar precios de servicios para negocios pequeños. Te adjunto una imagen de mi lista de precios.
+
+MI NEGOCIO
+- Qué vendo: [tu negocio, por ejemplo "peluquería"]
+- A quién se la enseño: [clientes nuevos / mostrador / web / Instagram]
+- Qué quiero que haga quien la ve: [reservar / llamar / escribir por WhatsApp]
+
+REVISA LA LISTA CON ESTAS 5 PREGUNTAS
+1. ¿Se entiende qué incluye cada precio?
+2. ¿Se lee el precio de un vistazo y todos tienen el mismo formato?
+3. ¿Hay una opción que destaque o todo pesa igual?
+4. ¿Aclara de qué depende el precio cuando varía?
+5. ¿Dice qué hacer a continuación?
+
+RESPÓNDEME ASÍ
+- Una nota de 1 a 5 por pregunta, con una frase de por qué.
+- Una versión rehecha de la lista con la misma información: NO cambies precios ni inventes servicios, descuentos ni condiciones. Si falta qué incluye un servicio, déjalo entre corchetes para que lo complete yo.
+- Qué opción destacarías y por qué (es una sugerencia; la decido yo).
+- Lo que NO puedas saber solo con la imagen (cuáles se piden más, cuáles dejan más margen) dímelo y no lo supongas.</pre>
+    </div>
+
+    <p class="warn"><b>Revisa los precios antes de publicar.</b> La IA ordena y redacta, pero los precios y lo que incluyen son tuyos. Comprueba que no ha cambiado ninguna cifra.</p>
+  </section>
+
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+
+<script>
+(function(){
+  var S={p:false,pr:false,l:false}, lp=document.getElementById('lp');
+  function paint(){
+    lp.classList.toggle('on1',S.p); lp.classList.toggle('on2',S.pr); lp.classList.toggle('dim',S.l);
+    document.querySelector('.r2').classList.toggle('hl',S.l);
+    var n=(S.p?1:0)+(S.pr?1:0)+(S.l?1:0), c=document.getElementById('rCount');
+    c.textContent=n+' de 3'; c.className=n===3?'ok':'bad';
+    Array.prototype.forEach.call(document.querySelectorAll('#toggles button'),function(b){b.setAttribute('aria-pressed',S[b.dataset.k]?'true':'false')});
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('#toggles button'),function(b){
+    b.addEventListener('click',function(){S[b.dataset.k]=!S[b.dataset.k];paint()});
+  });
+  document.getElementById('reset').addEventListener('click',function(){S={p:false,pr:false,l:false};paint()});
+  paint();
+
+  var btn=document.getElementById('copy'), pre=document.getElementById('prompt');
+  function done(){btn.textContent='Copiado';btn.classList.add('ok');setTimeout(function(){btn.textContent='Copiar prompt';btn.classList.remove('ok')},2200)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selecciona y copia';setTimeout(function(){btn.textContent='Copiar prompt'},2600)}
+  btn.addEventListener('click',function(){
+    var txt=pre.innerText;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}
+  });
+})();
+</script>
+</body>
+</html>
