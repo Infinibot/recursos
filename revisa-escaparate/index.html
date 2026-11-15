@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Toca tres arreglos y mira cómo cambia un escaparate de ejemplo. Con las 5 preguntas y el prompt para que la IA revise el tuyo.">
+<meta property="og:title" content="Revisa tu escaparate con IA">
+<meta property="og:description" content="Tres arreglos que se ven al tocar, 5 preguntas y el prompt para que Claude revise la foto del tuyo.">
+<title>Revisa tu escaparate con IA</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: página oscura de marca (marino + azul eléctrico) con el escaparate de ejemplo en el centro. */
+:root{
+  color-scheme:dark;
+  --bg:#07101F; --panel:#0E1C36; --line:#1d3358; --ink:#F4F7FB; --mute:#9db0cc;
+  --blue:#2F7BFF; --blue-soft:#7fb0ff; --orange:#FF7A1A; --red:#ff6b61; --green:#5fd9a0;
+  --fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}
+h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+
+/* el escaparate (proporción fija; todo en porcentajes para que encaje en cualquier móvil) */
+.shop{border-radius:14px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.awn{position:relative;height:0;padding-top:11%;background:repeating-linear-gradient(90deg,#c2410c 0 8.4%,#f3e9d8 8.4% 16.8%)}
+.sign{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#fbfaf6;color:#7c2d12;font:800 clamp(13px,4vw,20px)/1 var(--fd);padding:.45em 1em;border-radius:6px;white-space:nowrap}
+.win{position:relative;aspect-ratio:840/470;background:#27324a;border:6px solid #5a3a1e;border-top:0;overflow:hidden;transition:background-color .5s}
+.win.lit{background:#6a4424}
+.warm{position:absolute;inset:0;background:radial-gradient(60% 55% at 50% 45%,rgba(255,206,130,.75),rgba(255,170,90,.18) 70%,rgba(0,0,0,0));opacity:0;transition:opacity .5s}
+.win.lit .warm{opacity:1}
+.shelf{position:absolute;left:0;right:0;height:2.5%;background:#7a5a3a;box-shadow:0 4px 8px rgba(0,0,0,.35)}
+.it{position:absolute;box-shadow:inset -.8vmin -.8vmin 0 rgba(0,0,0,.16),0 4px 8px rgba(0,0,0,.3);
+  transition:left .5s cubic-bezier(.2,.8,.2,1),top .5s cubic-bezier(.2,.8,.2,1),width .5s cubic-bezier(.2,.8,.2,1),height .5s cubic-bezier(.2,.8,.2,1),opacity .35s,transform .4s}
+.it.gone{opacity:0;transform:scale(.2) rotate(30deg)}
+.pt{position:absolute;left:50%;bottom:2px;transform:translateX(-50%);background:#fff;color:#222;font:700 clamp(6px,1.5vw,9px)/1.3 var(--fb);padding:0 3px;border-radius:2px;white-space:nowrap;transition:opacity .2s}
+.noprice .pt{opacity:0}
+.hp{position:absolute;left:38%;top:74%;width:24%;text-align:center;background:#ffe36e;color:#3a2a05;font:800 clamp(18px,6vw,34px)/1.2 var(--fd);padding:.1em 0;border-radius:8px;box-shadow:0 8px 18px rgba(0,0,0,.5);
+  opacity:0;transform:translateY(-40%) rotate(-8deg);transition:opacity .3s,transform .5s cubic-bezier(.3,1.6,.5,1);z-index:3}
+.bigprice .hp{opacity:1;transform:rotate(-4deg)}
+.floor{background:#3b2a1a;text-align:center;font:800 10px/1 var(--fb);letter-spacing:.18em;color:#d8c7ad;padding:10px 4px;text-transform:uppercase}
+.toggles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.toggles button{font:600 13.5px/1.25 var(--fb);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 8px;min-height:56px;cursor:pointer}
+.toggles button:hover{border-color:var(--blue)}
+.toggles button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.read{display:flex;gap:8px;margin-top:10px}
+.read div{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--mute)}
+.read b{display:block;font:800 18px/1.2 var(--fd);color:var(--ink);margin-top:2px}
+.read b.ok{color:var(--green)}.read b.bad{color:var(--red)}
+.reset{margin-top:10px;font:600 13px/1 var(--fb);color:var(--blue-soft);background:none;border:0;padding:12px 4px;min-height:44px;cursor:pointer;text-decoration:underline}
+.demo{font:600 11px/1 var(--fb);letter-spacing:.1em;color:var(--orange);margin-top:6px}
+.hint{color:var(--mute);font-size:14px;margin:12px 2px 0}
+
+/* las 5 preguntas */
+.qs h2,.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}
+.qlist{list-style:none;margin:20px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.qlist li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.qlist .t{min-width:0}
+.qlist b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.qlist span{color:var(--mute);font-size:14.5px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+
+/* sección del prompt */
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}
+.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.steps span{color:var(--mute);font-size:14.5px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy:hover{filter:brightness(1.1)}
+.copy.ok{background:#1f9d62}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}
+.warn b{color:var(--orange)}
+.sig{color:var(--mute);font-size:13px;text-align:center}
+.sig b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.it,.win,.warm,.hp,.pt{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · ESCAPARATE</div>
+    <h1>Toca tres arreglos. <em>Mira cómo cambia el escaparate.</em></h1>
+    <p class="lead">Este es el escaparate de una tienda de ejemplo. Actívalos uno a uno: debajo tienes las 5 preguntas y el prompt para que Claude revise la foto del tuyo.</p>
+  </header>
+
+  <section aria-label="Demo del escaparate">
+    <div class="shop">
+      <div class="awn"><div class="sign">TIENDA EJEMPLO</div></div>
+      <div class="win" id="win">
+        <div class="warm"></div>
+        <div class="shelf" style="top:53%"></div><div class="shelf" style="top:91%"></div>
+        <div id="items"></div>
+        <div class="hp" id="hp">12 €</div>
+      </div>
+      <div class="floor">Negocio ficticio · ilustración</div>
+    </div>
+    <div class="toggles" id="toggles" role="group" aria-label="Arreglos">
+      <button type="button" data-k="p" aria-pressed="false">1 · Un protagonista</button>
+      <button type="button" data-k="pr" aria-pressed="false">2 · Precio grande</button>
+      <button type="button" data-k="l" aria-pressed="false">3 · Luz cálida</button>
+    </div>
+    <div class="read" aria-live="polite">
+      <div>Cosas a la vista<b id="rCount" class="bad">14</b></div>
+      <div>Precio<b id="rPrice" class="bad">ilegible</b></div>
+    </div>
+    <button type="button" class="reset" id="reset">Volver al antes</button>
+    <div class="demo">DEMO · NEGOCIO FICTICIO</div>
+    <p class="hint">Es una ilustración: las cifras son de ejemplo y no prometen resultados. Lo que cambia es lo que se ve de un vistazo.</p>
+  </section>
+
+  <section class="qs" aria-label="Las cinco preguntas">
+    <h2>5 preguntas para tu escaparate</h2>
+    <p class="lead">Míralo desde la acera, como lo vería alguien que pasa. Si dudas en alguna, ahí hay trabajo.</p>
+    <ol class="qlist">
+      <li><div class="dot">1</div><div class="t"><b>¿Qué es lo primero que se ve?</b><span>Si todo pesa igual, nada destaca. Debería haber un producto protagonista.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>¿Cuántas cosas compiten?</b><span>Cuenta lo que hay. Cuantas más, más difícil es que se fijen en una sola.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>¿Se lee el precio desde fuera?</b><span>Colócate donde pasa la gente. Si hay que acercarse a leerlo, no se lee.</span></div></li>
+      <li><div class="dot">4</div><div class="t"><b>¿Cómo es la luz?</b><span>Reflejos, sombras o luz fría pueden esconder tu producto. Mira también de noche.</span></div></li>
+      <li><div class="dot">5</div><div class="t"><b>¿Se entiende qué vendes?</b><span>Sin leer nada, ¿alguien sabe de qué es tu negocio y qué quieres que haga?</span></div></li>
+    </ol>
+  </section>
+
+  <section class="how" aria-label="Revisión con IA">
+    <h2>Que la IA revise el tuyo</h2>
+    <p class="lead">Hazle una foto de frente al escaparate y pídele a Claude que la revise con esas 5 preguntas.</p>
+    <ol class="steps">
+      <li><div class="dot">1</div><div class="t"><b>Haz una foto de frente</b><span>Desde la acera, de día y sin reflejos si puedes. Otra de noche si tienes luz encendida.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>Copia el prompt y adjunta la foto</b><span>Cambia solo lo que va entre corchetes.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>Cámbialo tú y compara</b><span>Aplica un arreglo cada vez y haz otra foto. Así sabes cuál ha funcionado.</span></div></li>
+    </ol>
+
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt para tu escaparate</span><button class="copy" id="copy" type="button">Copiar prompt</button></div>
+      <pre id="prompt">Eres un experto en visual merchandising de comercio pequeño. Te adjunto una foto de frente del escaparate de mi negocio.
+
+MI NEGOCIO
+- Qué vendo: [tu negocio, por ejemplo "tienda de regalos"]
+- A quién quiero atraer: [por ejemplo "gente del barrio que pasa a pie"]
+- Qué quiero que haga quien pasa: [entrar / mirar los precios / llamar / apuntar el teléfono]
+
+REVISA LA FOTO CON ESTAS 5 PREGUNTAS
+1. ¿Qué es lo primero que se ve? ¿Hay un producto protagonista?
+2. ¿Cuántos objetos compiten por la atención? Cuéntalos.
+3. ¿Se leen los precios desde la acera?
+4. ¿Cómo es la luz? ¿Hay reflejos, sombras o zonas apagadas?
+5. ¿Se entiende de un vistazo qué vendo?
+
+RESPÓNDEME ASÍ
+- Una nota de 1 a 5 por pregunta, con una frase de por qué.
+- Los 3 arreglos que más cambiarían el escaparate, ordenados de mayor a menor impacto, y que pueda hacer yo hoy con lo que ya tengo.
+- Lo que NO puedas saber solo con la foto (medidas, tráfico de gente, luz real de noche) dímelo y no lo supongas.</pre>
+    </div>
+
+    <p class="warn"><b>Es una opinión, no un veredicto.</b> La IA puede equivocarse al valorar una foto. Compruébalo tú mismo desde la calle, de día y de noche, y decide con tu conocimiento de tus clientes.</p>
+  </section>
+
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+
+<script>
+(function(){
+  // Escaparate de ejemplo en un lienzo de 840 × 470: [x, ancho, alto, color, radio, balda]. Baldas a y=250 (1) y y=430 (2).
+  var W=840,H=470,BOT={1:248,2:428};
+  var I=[[30,70,70,'#e8b04a','14px',1],[140,60,90,'#6c8cff','30px 30px 8px 8px',1],[240,90,60,'#d65a4a','12px',1],[360,70,110,'#7bd8c8','26px 26px 8px 8px',1],
+    [490,60,60,'#ffd24a','50%',1],[620,80,80,'#d96ad0','16px',1],[30,80,100,'#4aa3d6','28px 28px 10px 10px',2],[125,70,70,'#d65a4a','14px',2],
+    [210,60,150,'#5cd6a3','30px 30px 10px 10px',2],[285,90,60,'#8bc34a','40px 40px 12px 12px',2],[395,100,140,'#9b6cff','34px 34px 14px 14px',2],
+    [520,70,80,'#ff8a5c','16px',2],[610,80,120,'#c78bd6','26px 26px 8px 8px',2],[705,70,70,'#f2d44e','50%',2]];
+  var PR=['9','12','7,5','3','5,5','8','15','6','4,5','9','12','2,5','18','5'];
+  // al activar «un protagonista»: se queda el 10 (grande, al centro) y los vecinos 8 y 12; los demás se esconden
+  var KEEP={10:[320,110,200,280],8:[164,250,72,180],12:[594,271,92,138]};
+  var host=document.getElementById('items'), win=document.getElementById('win'), els=[];
+  function pos(el,x,y,w,h){el.style.left=(x/W*100)+'%';el.style.top=(y/H*100)+'%';el.style.width=(w/W*100)+'%';el.style.height=(h/H*100)+'%'}
+  I.forEach(function(d,i){
+    var el=document.createElement('div'); el.className='it'; el.style.background=d[3]; el.style.borderRadius=d[4];
+    pos(el,d[0],BOT[d[5]]-d[2],d[1],d[2]);
+    el.innerHTML='<span class="pt">'+PR[i]+' €</span>'; host.appendChild(el); els.push(el);
+  });
+  var S={p:false,pr:false,l:false};
+  function paint(){
+    els.forEach(function(el,i){
+      var d=I[i];
+      if(S.p){ if(KEEP[i]){pos(el,KEEP[i][0],KEEP[i][1],KEEP[i][2],KEEP[i][3]);el.classList.remove('gone')} else {el.classList.add('gone')} }
+      else { pos(el,d[0],BOT[d[5]]-d[2],d[1],d[2]); el.classList.remove('gone') }
+    });
+    win.classList.toggle('noprice',S.pr); win.classList.toggle('bigprice',S.pr); win.classList.toggle('lit',S.l);
+    var c=document.getElementById('rCount'), p=document.getElementById('rPrice');
+    c.textContent=S.p?'3':'14'; c.className=S.p?'ok':'bad';
+    p.textContent=S.pr?'12 €':'ilegible'; p.className=S.pr?'ok':'bad';
+    Array.prototype.forEach.call(document.querySelectorAll('#toggles button'),function(b){b.setAttribute('aria-pressed',S[b.dataset.k]?'true':'false')});
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('#toggles button'),function(b){
+    b.addEventListener('click',function(){S[b.dataset.k]=!S[b.dataset.k];paint()});
+  });
+  document.getElementById('reset').addEventListener('click',function(){S={p:false,pr:false,l:false};paint()});
+  paint();
+
+  var btn=document.getElementById('copy'), pre=document.getElementById('prompt');
+  function done(){btn.textContent='Copiado';btn.classList.add('ok');setTimeout(function(){btn.textContent='Copiar prompt';btn.classList.remove('ok')},2200)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selecciona y copia';setTimeout(function(){btn.textContent='Copiar prompt'},2600)}
+  btn.addEventListener('click',function(){
+    var txt=pre.innerText;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}
+  });
+})();
+</script>
+</body>
+</html>
