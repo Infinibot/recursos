@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#07101F">
+<meta name="description" content="Toca tres cambios y mira cómo se transforma la respuesta a una reseña de una estrella. Con las 5 claves y el prompt para escribir la tuya.">
+<meta property="og:title" content="Responde a una reseña mala con IA">
+<meta property="og:description" content="Tres cambios que se ven al tocar, 5 claves y el prompt para que Claude te ayude a responder.">
+<title>Responde a una reseña mala con IA</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: página oscura de marca (marino + azul eléctrico) con la reseña de ejemplo en el centro. */
+:root{
+  color-scheme:dark;
+  --bg:#07101F; --panel:#0E1C36; --line:#1d3358; --ink:#F4F7FB; --mute:#9db0cc;
+  --blue:#2F7BFF; --blue-soft:#7fb0ff; --orange:#FF7A1A; --red:#ff6b61; --green:#5fd9a0;
+  --fd:'Bricolage Grotesque','Arial Narrow',system-ui,sans-serif;
+  --fb:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 var(--fb);
+  padding-block:32px 56px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:44px}
+h1,h2,h3{font-family:var(--fd);font-weight:800;margin:0;letter-spacing:-.02em;text-wrap:balance}
+.eyebrow{font:600 12px/1 var(--fb);letter-spacing:.14em;text-transform:uppercase;color:var(--blue-soft)}
+h1{font-size:clamp(34px,9vw,52px);line-height:1.02;margin-top:14px}
+h1 em{font-style:normal;color:var(--blue)}
+.lead{color:var(--mute);margin:14px 0 0;max-width:46ch}
+:focus-visible{outline:2px solid var(--blue-soft);outline-offset:3px}
+
+/* el perfil de ejemplo (recreado) */
+.pf{background:#fbfaf6;color:#1b2333;border-radius:20px;padding:20px 18px 18px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.ph{display:flex;align-items:center;gap:14px}
+.av{flex:none;width:76px;height:76px;border-radius:50%;background:linear-gradient(135deg,#feda75,#d62976 55%,#4f5bd5);display:grid;place-items:center}
+.av span{display:grid;place-items:center;width:66px;height:66px;border-radius:50%;background:#fbfaf6;font:800 36px/1 var(--fd);color:#c2410c}
+.pn b{display:block;font:700 19px/1.2 var(--fb)}.pn span{display:block;font-size:14px;color:#566275}
+.bio{margin-top:14px;font-size:16px;line-height:1.35;font-weight:600}
+.ln,.lk,.btn{display:grid;padding:5px 6px;margin:0 -6px;border-radius:8px;transition:background-color .4s}
+.la,.lb{grid-area:1/1;transition:opacity .35s,transform .35s}
+.lb{opacity:0;transform:translateY(8px)}
+.on .la{opacity:0;transform:translateY(-8px)}.on .lb{opacity:1;transform:none}
+.ln.flash{background-color:rgba(47,123,255,.22)}
+.lk{font-weight:800;color:#1f5fd6}
+.btn{margin:12px 0 0;padding:0;text-align:center;font-weight:800;font-size:16px;border-radius:10px;background:#2F7BFF;color:#fff;line-height:44px;height:44px}
+.rec{font:800 9px/1 var(--fb);letter-spacing:.14em;color:#7a6a58;text-align:right;margin-bottom:6px}
+.rv{background:#fbfaf6;color:#1b2333;border-radius:20px;padding:18px 18px 16px;box-shadow:0 24px 60px rgba(0,0,0,.45)}
+.rh{display:flex;align-items:center;gap:12px}
+.cav{flex:none;width:48px;height:48px;border-radius:50%;background:#c9ced8;display:grid;place-items:center;font:800 26px/1 var(--fd);color:#566275}
+.rh b{display:block;font:700 16px/1.2 var(--fb)}
+.stars{font-size:20px;letter-spacing:2px;line-height:1.1}.stars .on{color:#c2610a}.stars .off{color:#7a8394}
+.rv p{margin:10px 0 0;font-size:15.5px;line-height:1.4;font-weight:600}
+.rp{margin-top:10px;border-radius:16px;padding:14px 16px;background:#d9dce2;color:#3a4150;transition:background-color .4s,color .4s;box-shadow:0 18px 40px rgba(0,0,0,.4)}
+.rp.good{background:#fff;color:#1b2333}
+.rl{font:800 10px/1 var(--fb);letter-spacing:.14em;color:#434a5a;margin-bottom:8px}
+.rp.good .rl{color:#1f5fd6}
+.rp p{margin:0;font-size:15.5px;line-height:1.45;font-weight:600}
+.rp .ln{display:grid;padding:3px 6px;margin:0 -6px;border-radius:8px;transition:background-color .4s}
+.rp .la,.rp .lb{grid-area:1/1}
+.toggles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px}
+.toggles button{font:600 13.5px/1.25 var(--fb);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 8px;min-height:56px;cursor:pointer}
+.toggles button:hover{border-color:var(--blue)}
+.toggles button[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.read{display:flex;gap:8px;margin-top:10px}
+.read div{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 12px;font-size:13px;color:var(--mute)}
+.read b{display:block;font:800 18px/1.2 var(--fd);color:var(--ink);margin-top:2px}
+.read b.ok{color:var(--green)}.read b.bad{color:var(--red)}
+.reset{margin-top:10px;font:600 13px/1 var(--fb);color:var(--blue-soft);background:none;border:0;padding:12px 4px;min-height:44px;cursor:pointer;text-decoration:underline}
+.demo{font:600 11px/1 var(--fb);letter-spacing:.1em;color:var(--orange);margin-top:6px}
+.hint{color:var(--mute);font-size:14px;margin:12px 2px 0}
+
+/* las 5 preguntas */
+.qs h2,.how h2{font-size:clamp(26px,7vw,34px);line-height:1.08}
+.qlist{list-style:none;margin:20px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.qlist li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.qlist .t{min-width:0}
+.qlist b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.qlist span{color:var(--mute);font-size:14.5px}
+.dot{flex:none;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font:700 13px/26px var(--fb);text-align:center;margin-top:1px}
+
+/* sección del prompt */
+.steps{list-style:none;margin:22px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
+.steps li{display:flex;gap:14px;align-items:flex-start;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+.steps .t{min-width:0}
+.steps b{display:block;font:700 16px/1.3 var(--fd);margin-bottom:2px}
+.steps span{color:var(--mute);font-size:14.5px}
+.promptbox{margin-top:22px;background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+.pb-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-bottom:1px solid var(--line)}
+.pb-bar span{font:600 12px/1 var(--fb);letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.copy{font:600 14px/1 var(--fb);background:var(--blue);color:#fff;border:0;border-radius:10px;padding:12px 18px;min-height:44px;cursor:pointer}
+.copy:hover{filter:brightness(1.1)}
+.copy.ok{background:#1f9d62}
+pre{margin:0;padding:16px;font:400 13px/1.6 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#d6e2f5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:380px;overflow:auto}
+.warn{margin-top:18px;border-left:3px solid var(--orange);padding:4px 0 4px 14px;color:var(--ink);font-size:14.5px}
+.warn b{color:var(--orange)}
+.sig{color:var(--mute);font-size:13px;text-align:center}
+.sig b{color:var(--ink)}
+@media (prefers-reduced-motion:reduce){.la,.lb,.ln,.lk,.btn{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Recurso · ESTRELLA</div>
+    <h1>Toca tres cambios. <em>Mira cómo cambia la respuesta.</em></h1>
+    <p class="lead">Esta es una reseña de una estrella (ficticia) con una respuesta a la defensiva. Actívalos uno a uno: debajo tienes las 5 claves y el prompt para escribir la tuya.</p>
+  </header>
+
+  <section aria-label="Demo de la respuesta">
+    <div class="rv">
+      <div class="rh"><div class="cav">C</div><div><b>Cliente ficticio</b><span class="stars"><i class="on">★</i><i class="off">★★★★</i></span></div></div>
+      <p>Llevo una semana esperando respuesta y nadie me ha contestado. Servicio pésimo.</p>
+    </div>
+    <div class="rp" id="rp">
+      <div class="rl" id="rl">RESPUESTA DEL NEGOCIO</div>
+      <p>
+        <span class="ln" data-g="1"><span class="la">Lamentamos su opinión,</span><span class="lb">Tienes razón: tardamos demasiado en contestarte.</span></span>
+        <span class="ln" data-g="2"><span class="la">pero estamos saturados</span><span class="lb">Lo siento mucho.</span></span>
+        <span class="ln" data-g="3"><span class="la">y no podemos atender a todo el mundo.</span><span class="lb">Te escribo hoy por privado para solucionarlo.</span></span>
+      </p>
+    </div>
+    <div class="toggles" id="toggles" role="group" aria-label="Arreglos">
+      <button type="button" data-k="p" aria-pressed="false">1 · Reconoce</button>
+      <button type="button" data-k="pr" aria-pressed="false">2 · Pide perdón</button>
+      <button type="button" data-k="l" aria-pressed="false">3 · Ofrece solución</button>
+    </div>
+    <div class="read" aria-live="polite">
+      <div>Cambios aplicados<b id="rCount" class="bad">0</b></div>
+      <div>Tono<b id="rPrice" class="bad">defensivo</b></div>
+    </div>
+    <button type="button" class="reset" id="reset">Volver al antes</button>
+    <div class="demo">DEMO · NEGOCIO FICTICIO</div>
+    <p class="hint">Es una ilustración con una reseña ficticia. No promete resultados: cambia el tono, y el tono lo lee todo el que busca tu negocio.</p>
+  </section>
+
+  <section class="qs" aria-label="Las cinco claves">
+    <h2>5 claves para responder bien</h2>
+    <p class="lead">Tu respuesta no es solo para quien escribió la reseña. Repásalas antes de publicar.</p>
+    <ol class="qlist">
+      <li><div class="dot">1</div><div class="t"><b>Responde con calma, no en caliente</b><span>Escribe el primer borrador, déjalo un rato y vuelve a leerlo antes de publicar.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>Reconoce el problema</b><span>Di qué ha pasado con tus palabras. Discutir los hechos solo alarga la conversación.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>Pide perdón sin excusas</b><span>«Lo siento» y ya. Si añades «pero…», se lee como una excusa.</span></div></li>
+      <li><div class="dot">4</div><div class="t"><b>Ofrece algo concreto</b><span>Una acción que puedas cumplir de verdad y, si hay datos personales, llévala a privado.</span></div></li>
+      <li><div class="dot">5</div><div class="t"><b>Escribe pensando en quien la lee</b><span>No solo la verá quien la escribió: también quien te está buscando. Breve, amable y sin datos del cliente.</span></div></li>
+    </ol>
+  </section>
+
+  <section class="how" aria-label="Revisión con IA">
+    <h2>Que la IA te ayude con la tuya</h2>
+    <p class="lead">Pega la reseña real en Claude y pídele un borrador con esas 5 claves. Tú decides qué se publica.</p>
+    <ol class="steps">
+      <li><div class="dot">1</div><div class="t"><b>Copia la reseña</b><span>Solo el texto. Quita el nombre y cualquier dato personal del cliente antes de pegarla.</span></div></li>
+      <li><div class="dot">2</div><div class="t"><b>Copia el prompt y pega la reseña</b><span>Cambia solo lo que va entre corchetes.</span></div></li>
+      <li><div class="dot">3</div><div class="t"><b>Cámbialo tú y compara</b><span>Lee el borrador como si fueras el cliente, cámbialo con tus palabras y asegúrate de que puedes cumplir lo que ofreces.</span></div></li>
+    </ol>
+
+    <div class="promptbox">
+      <div class="pb-bar"><span>Prompt para tu respuesta</span><button class="copy" id="copy" type="button">Copiar prompt</button></div>
+      <pre id="prompt">Eres un experto en atención al cliente para negocios pequeños. Voy a pegarte una reseña negativa de mi negocio y quiero que me ayudes a responderla.
+
+MI NEGOCIO
+- Qué hago: [tu negocio, por ejemplo "peluquería"]
+- Cómo hablo con mis clientes: [cercano / formal; tutear o usted]
+- Qué puedo ofrecer de verdad: [por ejemplo "llamar hoy", "repetir el servicio", "devolver el importe"]
+
+LA RESEÑA (sin nombre ni datos personales)
+[PEGA AQUÍ LA RESEÑA]
+
+QUÉ QUIERO
+1. Dos respuestas: una breve (máx. 40 palabras) y una algo más cercana (máx. 80).
+2. Cada respuesta debe: reconocer el problema con palabras concretas, pedir perdón sin excusas ni «pero…», y ofrecer solo algo de lo que te he dicho que puedo ofrecer.
+3. Si hay datos personales o es mejor hablar por privado, invita a continuar por mensaje privado.
+4. Sin frases hechas («lamentamos las molestias»), sin culpar al cliente y sin inventar datos ni compensaciones que yo no te haya dado. Si falta algo, déjalo entre corchetes.
+
+AL TERMINAR
+- Dime si la reseña me parece injusta o falsa y, en ese caso, cómo responder con calma y qué pasos puedo seguir en la plataforma para denunciarla.
+- Dime qué debería revisar yo antes de publicar la respuesta.</pre>
+    </div>
+
+    <p class="warn"><b>Revísalo antes de publicar.</b> La IA escribe el borrador, la respuesta es tuya. No ofrezcas nada que no puedas cumplir y no incluyas datos del cliente.</p>
+  </section>
+
+  <p class="sig"><b>InfiniBot</b> · IA práctica para trabajos reales · @infinibot.es</p>
+</div>
+
+<script>
+(function(){
+  var S={p:false,pr:false,l:false}, G={p:'1',pr:'2',l:'3'};
+  var rp=document.getElementById('rp'), rl=document.getElementById('rl');
+  function paint(){
+    Object.keys(G).forEach(function(k){
+      Array.prototype.forEach.call(document.querySelectorAll('[data-g="'+G[k]+'"]'),function(el){el.classList.toggle('on',S[k])});
+    });
+    var n=(S.p?1:0)+(S.pr?1:0)+(S.l?1:0);
+    var c=document.getElementById('rCount'), t=document.getElementById('rPrice');
+    c.textContent=n+' de 3'; c.className=n===3?'ok':'bad';
+    t.textContent=n===3?'empático':(n?'mejorando':'defensivo'); t.className=n===3?'ok':'bad';
+    rp.classList.toggle('good',n===3);
+    rl.textContent=n===3?'RESPUESTA ESCRITA CON IA · EJEMPLO':'RESPUESTA DEL NEGOCIO';
+    Array.prototype.forEach.call(document.querySelectorAll('#toggles button'),function(b){b.setAttribute('aria-pressed',S[b.dataset.k]?'true':'false')});
+  }
+  Array.prototype.forEach.call(document.querySelectorAll('#toggles button'),function(b){
+    b.addEventListener('click',function(){
+      S[b.dataset.k]=!S[b.dataset.k]; paint();
+      var ln=document.querySelector('.ln[data-g="'+G[b.dataset.k]+'"]'); ln.classList.add('flash'); setTimeout(function(){ln.classList.remove('flash')},500);
+    });
+  });
+  document.getElementById('reset').addEventListener('click',function(){S={p:false,pr:false,l:false};paint()});
+  paint();
+
+  var btn=document.getElementById('copy'), pre=document.getElementById('prompt');
+  function done(){btn.textContent='Copiado';btn.classList.add('ok');setTimeout(function(){btn.textContent='Copiar prompt';btn.classList.remove('ok')},2200)}
+  function fallback(){var r=document.createRange();r.selectNodeContents(pre);var s=window.getSelection();s.removeAllRanges();s.addRange(r);btn.textContent='Selecciona y copia';setTimeout(function(){btn.textContent='Copiar prompt'},2600)}
+  btn.addEventListener('click',function(){
+    var txt=pre.innerText;
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(txt).then(done,fallback)}else{fallback()}
+  });
+})();
+</script>
+</body>
+</html>
